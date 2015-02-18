@@ -39,7 +39,7 @@ int16_t main(void)
 
     /* Initialize IO ports and peripherals */
     InitApp();
-    TRISD = 0;
+    TRISD = 0; //Trisiodhf
 
     /* TODO <INSERT USER APPLICATION CODE HERE> */
 
