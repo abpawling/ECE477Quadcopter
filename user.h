@@ -11,3 +11,4 @@
 /* TODO User level functions prototypes (i.e. InitApp) go here */
 
 void InitApp(void);         /* I/O and Peripheral Initialization */
+bool Navigate(int); /*GPS Waypoint navigation function*/

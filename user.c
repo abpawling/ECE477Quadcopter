@@ -17,8 +17,11 @@
 
 #include <stdint.h>          /* For uint32_t definition */
 #include <stdbool.h>         /* For true/false definition */
+#include <stdlib.h>
+
 
 #include "user.h"            /* variables/params used by user.c */
+#include "LinkedList.h"
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -35,3 +38,15 @@ void InitApp(void)
     /* Initialize peripherals */
 }
 
+ bool Navigate(int finalDest)
+{
+    //declarations
+    waypoint *head = NULL;
+    waypoint *current;
+    
+    //get current GPS waypoint
+
+    //generate linked list for traversal
+
+    //traverse and update linked list
+}
