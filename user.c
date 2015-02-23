@@ -59,7 +59,7 @@ waypoint * InitCollisionList(int coord)
  bool Navigate(int finalDest)
 {
     //declarations
-     char orientation;
+     //char orientation;
 
      
      /*if (orientation == "N" && finalDest.orientation != "N")
