@@ -45,7 +45,7 @@ void InitApp(void)
     InitPWM();
     InitSPI();
     InitUART();
-    //
+    ///
 }
 
 void InitPWM(void)
