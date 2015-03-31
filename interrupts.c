@@ -157,39 +157,43 @@
 
 /* TODO Add interrupt routine code here. */
 
-/*SPI1 Interrupt*/
-void __attribute__((interrupt,auto_psv)) __SPI1Interrupt(void)
-{
-    /* Interrupt Service Routine code goes here */
-}
-
-/*SPI2 Interrupt*/
-void __attribute__((interrupt,auto_psv)) __SPI2Interrupt(void)
-{
-    /* Interrupt Service Routine code goes here */
-}
 
 /*UART1 Read Interrupt*/
-void __attribute__((interrupt,auto_psv)) __U1RXInterrupt(void)
+void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    /* Interrupt Service Routine code goes here */
+    int ReceiveBuff [20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int i = 0;
+    IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
+    /*while(i < 10){//(ReceiveBuff != "\n")
+        //if(U1STAbits.URXDA == 1)
+        //{
+            ReceiveBuff[i] = U1RXREG;
+            i++;
+            
+        //}
+    }*/
+    //IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
+    
+    //U1TXREG = 'a'; // Transmit one character
 }
 
-/*UART2 Read Interrupt*/
-void __attribute__((interrupt,auto_psv)) __U2RXInterrupt(void)
+/* Example code for Timer3 ISR*/
+void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
     /* Interrupt Service Routine code goes here */
+    if (OC1R >= 8000)
+    {
+        /*OC1R = 8000; //roll
+        OC2R = 3000; //pitch
+        OC3R = 3000; //throttle
+        OC4R = 8000; //yaw*/
+    }
+    else{
+        //OC1R += 100;
+        //OC2R += 100;
+        //OC3R += 100;
+        //OC4R += 100;
+    }
+    
+    IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
 }
-
-/*UART3 Read Interrupt*/
-void __attribute__((interrupt,auto_psv)) __U3RXInterrupt(void)
-{
-    /* Interrupt Service Routine code goes here */
-}
-
-/*UART4 Read Interrupt*/
-void __attribute__((interrupt,auto_psv)) __U4RXInterrupt(void)
-{
-    /* Interrupt Service Routine code goes here */
-}
-

@@ -17,6 +17,7 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <stdio.h>
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
@@ -46,7 +47,39 @@ int16_t main(void)
 
     while(1)
     {
-
+        /*TRISAbits.TRISA7 = 1;
+        if(PORTAbits.RA7)//(RPINR23BITS) //0b0010111
+        {
+            OC1R += 1000;
+        }*/        
+        //printf("HERE1");
         PORTD = 0xff;
+        int i;
+        //for (i = 0; i <= 10000;i++){}
+        PORTD = 0x00;
+        
+        char ReceivedChar;
+        /* Check for receive errors */
+        if(U1STAbits.FERR == 1)
+        {
+            continue;
+        }
+        /* Must clear the overrun error to keep UART receiving */
+        if(U1STAbits.OERR == 1)
+        {
+            U1STAbits.OERR = 0;
+            continue;
+        }
+        /* Get the data */
+        if(U1STAbits.URXDA == 1)
+        {
+            
+            ReceivedChar = U1RXREG;
+        }
+        
+        //printf("HERE2");
+        printf("Receive Data: %s",ReceivedChar);
+        
     }
+    
 }
