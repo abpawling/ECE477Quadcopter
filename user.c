@@ -78,14 +78,14 @@ void InitPWM(void)
 
     // ---------- PWM1 Initialization ----------
     RPOR2bits.RP69R = 0b010000; //Maps Output Compare 1 to output pin RP69 (pin 53)
-    OC1R = 4000; //ROLL
+    OC1R = 7000; //ROLL
     
     
     OC1CON1 = 0; // It is a good practice to clear off the control bits initially
     OC1CON2 = 0;
     OC1CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
     //OC1R = 4000; // This is just a typical number, user must calculate based on the waveform requirements and the system clock
-    //OC1RS = 8000; // Determines the Period
+    OC1RS = 8000; // Determines the Period
     OC1CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC1CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
 
@@ -104,7 +104,7 @@ void InitPWM(void)
     OC3CON1 = 0; // It is a good practice to clear off the control bits initially
     OC3CON2 = 0;
     OC3CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC3R = 7000; // THROTTLE This is just a typical number, user must calculate based on the waveform requirements and the system clock
+    OC3R = 4000; // THROTTLE This is just a typical number, user must calculate based on the waveform requirements and the system clock
     OC3RS = 8000; // Determines the Period
     OC3CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC3CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
