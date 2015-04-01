@@ -42,8 +42,16 @@ int16_t main(void)
 
     /* Initialize IO ports and peripherals */
     InitApp();
-
     
+    int push = 1;
+    if (push) //Pushbutton
+    {
+        Arm();
+        IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
+        IEC1bits.T4IE = 1; // Enable Timer4 interrupt
+        T4CONbits.TON = 1; // Start Timer4
+        push = 0;
+    }
 
     while(1)
     {
@@ -54,7 +62,6 @@ int16_t main(void)
         }*/        
         //printf("HERE1");
         PORTD = 0xff;
-        int i;
         //for (i = 0; i <= 10000;i++){}
         PORTD = 0x00;
         
@@ -78,7 +85,7 @@ int16_t main(void)
         }
         
         //printf("HERE2");
-        printf("Receive Data: %s",ReceivedChar);
+        //printf("Receive Data: %s",ReceivedChar);
         
     }
     

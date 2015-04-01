@@ -17,7 +17,8 @@
 
 #include <stdint.h>        /* Includes uint16_t definition */
 #include <stdbool.h>       /* Includes true/false definition */
-
+//#include "p24EP512GP806.h"
+//#include "p24EP512GU810.h"
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
 /******************************************************************************/
@@ -156,13 +157,13 @@
 /******************************************************************************/
 
 /* TODO Add interrupt routine code here. */
-
+int j = 0;
 
 /*UART1 Read Interrupt*/
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    int ReceiveBuff [20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    int i = 0;
+    //int ReceiveBuff [20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    //int i = 0;
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     /*while(i < 10){//(ReceiveBuff != "\n")
         //if(U1STAbits.URXDA == 1)
@@ -177,23 +178,24 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     //U1TXREG = 'a'; // Transmit one character
 }
 
-/* Example code for Timer3 ISR*/
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
-    /* Interrupt Service Routine code goes here */
-    if (OC1R >= 8000)
-    {
-        /*OC1R = 8000; //roll
-        OC2R = 3000; //pitch
-        OC3R = 3000; //throttle
-        OC4R = 8000; //yaw*/
-    }
-    else{
-        //OC1R += 100;
-        //OC2R += 100;
-        //OC3R += 100;
-        //OC4R += 100;
-    }
+    IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
+}
+
+/* Example code for Timer4 ISR*/
+void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
+{
     
-    IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
+    if (j >= 1)
+    {
+        OC1R = 4000; //ROLL
+        OC3R = 4000; // THROTTLE
+
+        //IEC1bits.T4IE = 1; // Enable Timer4 interrupt
+        T4CONbits.TON = 0; // Stop Timer4
+        
+    }
+    j++;
+    IFS1bits.T4IF = 0; //Clear Timer4 interrupt flag
 }
