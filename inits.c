@@ -15,12 +15,15 @@
     #endif
 #endif
 
-#include "inits.h"            /* variables/params used by user.c */
+#include "inits.h"            /* variables/params used by inits.c */
 
 void InitApp(void)
 {
     /* Setup analog functionality and port direction */
-
+    
+    TRISB = 0b0000000000111110; // set 5 RB0 as digital output and RB1-5 as inputs
+    TRISD = 0; //Trisiodhf
+    
     /* Initialize peripherals */
     InitPWM();
     InitSPI();
@@ -65,7 +68,7 @@ void InitTimers(void)
 
 void InitPWM(void)
 {
-    TRISD = 0; //Trisiodhf
+    
 
     // ---------- PWM1 Initialization (ROLL) ----------
     RPOR2bits.RP69R = 0b010000; //Maps Output Compare 1 to output pin RP69 (pin 53)    

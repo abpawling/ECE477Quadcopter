@@ -153,12 +153,16 @@
 /* release.                                                                   */
 /*                                                                            */
 
+#define SENSOR_AMOUNT 5
 
 /******************************************************************************/
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
 int armCount = 0; //global var to get proper ARM timing of flight controller
+
+// Positions                       F,B,L,R,D
+int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0};
 
 /******************************************************************************
  * 
@@ -190,6 +194,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
  ******************************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
+    //sensorArray[0] = 
     IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
 }
 

@@ -30,6 +30,7 @@
 
 /* i.e. uint16_t <variable_name>; */
 
+
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
@@ -44,6 +45,8 @@ int16_t main(void)
     InitApp();
     
     int push = 1; //TODO set up pushbutton
+    int sensorCount = 0;
+    
     if (push) //Pushbutton
     {
         Arm();
@@ -63,6 +66,15 @@ int16_t main(void)
         PORTD = 0xff;
         //for (i = 0; i <= 10000;i++){}
         PORTD = 0x00;
+        
+        
+        
+        
+        /*for (sensorCount; sensorCount <= SENSOR_AMOUNT;sensorCount++)
+        {
+            //check each sensor
+        }*/
+        
         
         char ReceivedChar;
         /* Check for receive errors */
