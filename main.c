@@ -43,7 +43,7 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     
-    int push = 1;
+    int push = 1; //TODO set up pushbutton
     if (push) //Pushbutton
     {
         Arm();
@@ -60,7 +60,6 @@ int16_t main(void)
         {
             OC1R += 1000;
         }*/        
-        //printf("HERE1");
         PORTD = 0xff;
         //for (i = 0; i <= 10000;i++){}
         PORTD = 0x00;

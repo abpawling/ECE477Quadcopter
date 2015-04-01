@@ -152,14 +152,19 @@
 /* <compiler installation directory>/doc directory for the latest compiler    */
 /* release.                                                                   */
 /*                                                                            */
+
+
 /******************************************************************************/
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-/* TODO Add interrupt routine code here. */
-int j = 0;
+int armCount = 0; //global var to get proper ARM timing of flight controller
 
-/*UART1 Read Interrupt*/
+/******************************************************************************
+ * 
+ * UART1 ISR - U1RX INTERRUPT
+ * 
+ ******************************************************************************/
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
     //int ReceiveBuff [20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -178,16 +183,25 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     //U1TXREG = 'a'; // Transmit one character
 }
 
+/******************************************************************************
+ * 
+ * Timer3 ISR - SENSOR INTERRUPT
+ * 
+ ******************************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
-    IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
+    IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
 }
 
-/* Example code for Timer4 ISR*/
+/******************************************************************************
+ * 
+ * Timer4 ISR - CONTROLLER INTERRUPT
+ * 
+ ******************************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
 {
     
-    if (j >= 1)
+    if (armCount >= 1)
     {
         OC1R = 4000; //ROLL
         OC3R = 4000; // THROTTLE
@@ -196,6 +210,6 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
         T4CONbits.TON = 0; // Stop Timer4
         
     }
-    j++;
+    armCount++;
     IFS1bits.T4IF = 0; //Clear Timer4 interrupt flag
 }
