@@ -16,7 +16,9 @@
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition */
-#include <stdbool.h>       /* Includes true/false definition */
+#include <stdbool.h>
+
+#include "LinkedList.h"       /* Includes true/false definition */
 //#include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
 /******************************************************************************/
@@ -189,12 +191,77 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 
 /******************************************************************************
  * 
- * Timer3 ISR - SENSOR INTERRUPT
+ * Timer5 ISR - SENSOR TRIGGER INTERRUPT
  * 
  ******************************************************************************/
+int c = 0;
+void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
+{    
+    if (c == 10 ){
+        PORTBbits.RB0 = 0;
+        c = 0;
+        T3CONbits.TON = 1; // Start Timer3
+    }
+    else{
+        PORTBbits.RB0 = 1;
+        c++;
+    }
+    IFS1bits.T5IF = 0; //Clear Timer5 interrupt flag
+}
+
+/******************************************************************************
+ * 
+ * Timer3 ISR - SENSOR ECHO INTERRUPT
+ * 
+ ******************************************************************************/
+bool frontFlag = 0;
+bool backFlag = 0;
+bool leftFlag = 0;
+bool rightFlag = 0;
+bool downFlag = 0;
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
-    //sensorArray[0] = 
+    //Object Detection
+    if (sensorArray[0] < 150)
+    {
+        sensorArray[0]++; //Front Sensor
+        frontFlag = 1; //throw flag for detection
+        T3CONbits.TON = 0; // Stop Timer3
+        //sensorArray[0] = 0; //reset count
+    }
+    
+    if (sensorArray[1] < 150)
+    {
+        sensorArray[1]++; //Back Sensor
+        backFlag = 1; //throw flag for detection
+        T3CONbits.TON = 0; // Stop Timer3
+        //sensorArray[1] = 0; //reset count
+    }
+    
+    if (sensorArray[2] < 150)
+    {
+        sensorArray[0]++; //Left Sensor
+        leftFlag = 1; //throw flag for detection
+        T3CONbits.TON = 0; // Stop Timer3
+        //sensorArray[2] = 0; //reset count
+    }
+    
+    if (sensorArray[3] < 150)
+    {
+        sensorArray[0]++; //Right Sensor
+        rightFlag = 1; //throw flag for detection
+        T3CONbits.TON = 0; // Stop Timer3
+        //sensorArray[3] = 0; //reset count
+    }
+    
+    if (sensorArray[4] < 150)
+    {
+        sensorArray[0]++; //Down Sensor
+        downFlag = 1; //throw flag for detection
+        T3CONbits.TON = 0; // Stop Timer3
+        //sensorArray[4] = 0; //reset count
+    }
+    
     IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
 }
 
@@ -209,7 +276,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
     if (armCount >= 1)
     {
         OC1R = 4000; //ROLL
-        OC3R = 4000; // THROTTLE
+        OC3R = 4000; //THROTTLE
 
         //IEC1bits.T4IE = 1; // Enable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4

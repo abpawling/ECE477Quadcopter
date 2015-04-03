@@ -42,13 +42,22 @@ void InitTimers(void)
     TMR4 = 0x00; // Clear timer register
     PR4 = 50000; // Load the period value
     
-    // Initialize Timer3 (SENSOR TIMER)
+    // Initialize Timer3 (SENSOR ECHO TIMER)
     T3CONbits.TON = 0; // Disable Timer
     T3CONbits.TCS = 0; // Select internal instruction cycle clock
     T3CONbits.TGATE = 0; // Disable Gated Timer mode
     T3CONbits.TCKPS = 0b11; //0b00 - Select 1:1 Prescalar
     TMR3 = 0x00; // Clear timer register
     PR3 = 500; // Load the period value
+    
+    // Initialize Timer5 (SENSOR TRIGGER TIMER)
+    T5CONbits.TON = 0; // Disable Timer
+    T5CONbits.TCS = 0; // Select internal instruction cycle clock
+    T5CONbits.TGATE = 0; // Disable Gated Timer mode
+    T5CONbits.TCKPS = 0b01; //0b00 - Select 1:1 Prescalar
+    TMR5 = 0x00; // Clear timer register
+    PR5 = 10000; // Load the period value
+    IEC1bits.T5IE = 1; // Enable Timer5 interrupt
     
     // Initialize Timer2 (PWM TIMER)
     T2CONbits.TON = 0; // Disable Timer
@@ -60,10 +69,11 @@ void InitTimers(void)
     
     // Enable Timers
     T2CONbits.TON = 1; // Start Timer2
-    T3CONbits.TON = 1; // Start Timer3
+    
+    T5CONbits.TON = 1; // Start Timer5
     
     IFS0bits.T3IF = 0; // Clear Timer3 Interrupt Flag
-    IEC0bits.T3IE = 0; // Disable Timer3 interrupt
+    IEC0bits.T3IE = 1; // Enable Timer3 interrupt
 }
 
 void InitPWM(void)
