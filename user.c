@@ -66,12 +66,28 @@ waypoint * InitCollisionList(int coord)
  * Controls quadcopter
  * 
  ******************************************************************************/
- bool Navigate(int finalDest)
+ bool Navigate(int finalDest, int* sensorArray)
 {
     //declarations
      //char orientation;
-
      
+    bool frontFlag = 0;
+    bool backFlag = 0;
+    bool leftFlag = 0;
+    bool rightFlag = 0;
+    bool downFlag = 0;
+    
+    if (sensorArray[0] >= 25) {frontFlag = 1;} //FRONT Sensor value
+    if (sensorArray[1] >= 25) {backFlag = 1;} //BACK Sensor value
+    if (sensorArray[2] >= 25) {leftFlag = 1;} //LEFT Sensor value
+    if (sensorArray[3] >= 25) {rightFlag = 1;} //RIGHT Sensor value
+    if (sensorArray[4] >= 25) {downFlag = 1;} //DOWN Sensor value*/
+    
+    //turn and "face" destination
+    //head straight to the destination
+    
+    //avoid obstacles
+    
      /*if (orientation == "N" && finalDest.orientation != "N")
      {
         //rotate until facing orientation

@@ -19,6 +19,7 @@
 #include <stdbool.h>
 
 #include "LinkedList.h"       /* Includes true/false definition */
+#include "user.h"          /* User funct/params, such as InitApp              */
 //#include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
 /******************************************************************************/
@@ -155,16 +156,26 @@
 /* release.                                                                   */
 /*                                                                            */
 
-#define SENSOR_AMOUNT 5
+// Function Definitions
+//int* getSensorArray(int);
+
+#define SENSOR_AMOUNT 6
+
+
+
+int armCount = 0; //global var to get proper ARM timing of flight controller
+
+// Positions                       F,B,L,R,D,count
+int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0,0};
+
+int * getSensorArray()
+{
+    return sensorArray; 
+}
 
 /******************************************************************************/
 /* Interrupt Routines                                                         */
 /******************************************************************************/
-
-int armCount = 0; //global var to get proper ARM timing of flight controller
-
-// Positions                       F,B,L,R,D
-int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0};
 
 /******************************************************************************
  * 
@@ -173,20 +184,36 @@ int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0};
  ******************************************************************************/
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    //int ReceiveBuff [20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    //int i = 0;
-    IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
-    /*while(i < 10){//(ReceiveBuff != "\n")
-        //if(U1STAbits.URXDA == 1)
-        //{
-            ReceiveBuff[i] = U1RXREG;
-            i++;
-            
-        //}
-    }*/
+    int ReceiveBuff [120]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int i,j = 0;
+    int temp = 0;
     //IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     
+    for(j = 0; j <= 120;j++)
+    {
+        ReceiveBuff[j] = 1;
+    }
+    
+    if (IFS0bits.U1RXIF)
+    {
+        while(i < 120){//(ReceiveBuff != "\n")
+            if(U1STAbits.URXDA == 1)
+            {
+                ReceiveBuff[i] = U1RXREG;
+                if (ReceiveBuff[i] == '$' || ReceiveBuff[i] == "$")
+                {
+                    temp = 1;
+                }
+                i++;
+
+            }
+        }
+    }
+    
     //U1TXREG = 'a'; // Transmit one character
+    IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
+    
+    
 }
 
 /******************************************************************************
@@ -195,16 +222,31 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
  * 
  ******************************************************************************/
 int c = 0;
+bool triggerDown = 0;
 void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
 {    
     if (c == 10 ){
-        PORTBbits.RB0 = 0;
+        PORTBbits.RB0 = 0; //Active low configuration -- assert trigger
         c = 0;
-        T3CONbits.TON = 1; // Start Timer3
+        triggerDown = 1;
+        //T3CONbits.TON = 1; // Start Timer3
+        //sensorArray[0] = 0;
+        //sensorArray[1] = 0;
+        //sensorArray[2] = 0;
+        //sensorArray[3] = 0;
+        //sensorArray[4] = 0;
+        //sensorArray[5] = 0;
     }
     else{
-        PORTBbits.RB0 = 1;
-        c++;
+        if (triggerDown)
+        {
+            T3CONbits.TON = 1; // Start Timer3
+            triggerDown = 0;
+        }
+        //T3CONbits.TON = 1; // Start Timer3
+        PORTBbits.RB0 = 1; //Active low configuration
+        c++;        
+        
     }
     IFS1bits.T5IF = 0; //Clear Timer5 interrupt flag
 }
@@ -214,52 +256,42 @@ void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
  * Timer3 ISR - SENSOR ECHO INTERRUPT
  * 
  ******************************************************************************/
-bool frontFlag = 0;
-bool backFlag = 0;
-bool leftFlag = 0;
-bool rightFlag = 0;
-bool downFlag = 0;
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
-{
-    //Object Detection
-    if (sensorArray[0] < 150)
+{    
+    //interrupt counter
+    sensorArray[5]++;
+    
+    //----- Object Detection -----
+    if (PORTBbits.RB1)
     {
         sensorArray[0]++; //Front Sensor
-        frontFlag = 1; //throw flag for detection
-        T3CONbits.TON = 0; // Stop Timer3
-        //sensorArray[0] = 0; //reset count
     }
     
-    if (sensorArray[1] < 150)
+    if (PORTBbits.RB2)
     {
         sensorArray[1]++; //Back Sensor
-        backFlag = 1; //throw flag for detection
-        T3CONbits.TON = 0; // Stop Timer3
-        //sensorArray[1] = 0; //reset count
     }
     
-    if (sensorArray[2] < 150)
+    if (!PORTBbits.RB3) //INVERTED
     {
-        sensorArray[0]++; //Left Sensor
-        leftFlag = 1; //throw flag for detection
-        T3CONbits.TON = 0; // Stop Timer3
-        //sensorArray[2] = 0; //reset count
+        sensorArray[2]++; //Left Sensor
     }
     
-    if (sensorArray[3] < 150)
+    if (!PORTBbits.RB4) //INTERRUPT NEEDS CONFIGURED
     {
-        sensorArray[0]++; //Right Sensor
-        rightFlag = 1; //throw flag for detection
-        T3CONbits.TON = 0; // Stop Timer3
-        //sensorArray[3] = 0; //reset count
+        sensorArray[3]++; //Right Sensor
     }
     
-    if (sensorArray[4] < 150)
+    if (PORTBbits.RB5) //INTERRUPT NEEDS CONFIGURED
     {
-        sensorArray[0]++; //Down Sensor
-        downFlag = 1; //throw flag for detection
+        sensorArray[4]++; //Down Sensor
+    }
+    
+    if (sensorArray[5] == 50) //30
+    {
         T3CONbits.TON = 0; // Stop Timer3
-        //sensorArray[4] = 0; //reset count
+        sensorArray[5] = 0;
+        sensorArray[3] = 0; //reset count
     }
     
     IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
@@ -267,7 +299,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 
 /******************************************************************************
  * 
- * Timer4 ISR - CONTROLLER INTERRUPT
+ * Timer4 ISR - FLIGHT CONTROLLER INTERRUPT
  * 
  ******************************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)

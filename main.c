@@ -21,6 +21,7 @@
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
+#include "inits.h"
 //#include "p24EP512GP806.h"
 #include "p24EP512GU810.h"
 
@@ -45,7 +46,9 @@ int16_t main(void)
     InitApp();
     
     int push = 1; //TODO set up pushbutton
-    int sensorCount = 0;
+    int * sensorArray;
+    int finalDest;
+    bool atDestination;
     
     if (push) //Pushbutton
     {
@@ -55,47 +58,35 @@ int16_t main(void)
         T4CONbits.TON = 1; // Start Timer4
         push = 0;
     }
-
+    
+    
     while(1)
-    {
-        /*TRISAbits.TRISA7 = 1;
-        if(PORTAbits.RA7)//(RPINR23BITS) //0b0010111
-        {
-            OC1R += 1000;
-        }*/        
-        PORTD = 0xff;
-        //for (i = 0; i <= 10000;i++){}
-        PORTD = 0x00;
+    {    
         
+        sensorArray = getSensorArray();
+        atDestination = Navigate(finalDest,sensorArray); //change flight path using sensor data
         
+        char ReceivedChar = 0;
+        int a;
         
-        
-        /*for (sensorCount; sensorCount <= SENSOR_AMOUNT;sensorCount++)
-        {
-            //check each sensor
-        }*/
-        
-        
-        char ReceivedChar;
         /* Check for receive errors */
         if(U1STAbits.FERR == 1)
         {
             continue;
         }
-        /* Must clear the overrun error to keep UART receiving */
+        // Must clear the overrun error to keep UART receiving 
         if(U1STAbits.OERR == 1)
         {
             U1STAbits.OERR = 0;
             continue;
         }
-        /* Get the data */
+        // Get the data
         if(U1STAbits.URXDA == 1)
         {
-            
+            a = 1;
             ReceivedChar = U1RXREG;
         }
-        
-        //printf("HERE2");
+       
         //printf("Receive Data: %s",ReceivedChar);
         
     }

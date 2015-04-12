@@ -19,10 +19,55 @@
 
 void InitApp(void)
 {
-    /* Setup analog functionality and port direction */
     
-    TRISB = 0b0000000000111110; // set 5 RB0 as digital output and RB1-5 as inputs
-    TRISD = 0; //Trisiodhf
+    //---------- Clear Analog Functionality ---------- 
+    
+    //GPS
+    ANSELEbits.ANSE1 = 0; //clear analog functionality of pin 61 // GPS TX / Micro RX
+    ANSELEbits.ANSE2= 0; //clear analog functionality of pin 62 // GPS RX / Micro TX
+    
+    //COMPASS
+    ANSELEbits.ANSE3 = 0; //clear analog functionality of pin 63 //
+    ANSELEbits.ANSE4= 0; //clear analog functionality of pin 64 //
+    
+    //SENSORS
+    ANSELBbits.ANSB4 = 0; //clear analog functionality of pin //TODO clear interrupt functionality
+    ANSELBbits.ANSB3 = 0; //clear analog functionality of pin
+    ANSELBbits.ANSB2 = 0; //clear analog functionality of pin
+    ANSELBbits.ANSB1 = 0; //clear analog functionality of pin
+    
+    //SDCARD
+    
+    //CAMERA
+    
+    //LCD SCREEN
+    
+    //BATTERY MONITOR
+    
+    //PUSHBUTTON
+    
+    //---------- Set Port Direction ----------
+       
+    //GPS / COMPASS
+    //TRISE = ;    
+    
+    //SENSORS
+    TRISB = 0b0000011111111110;
+    //TRISB = 0b0000000000111110; // set 5 RB0 as digital output and RB1-5 as inputs
+    
+    //FLIGHT CONTROLLER
+    //TRISD = 0b0000000000000010;
+    TRISD = 0xFFFF;
+    
+    //SDCARD
+    
+    //CAMERA
+    
+    //LCD SCREEN
+    
+    //BATTERY MONITOR
+    
+    //PUSHBUTTON
     
     /* Initialize peripherals */
     InitPWM();
@@ -46,9 +91,9 @@ void InitTimers(void)
     T3CONbits.TON = 0; // Disable Timer
     T3CONbits.TCS = 0; // Select internal instruction cycle clock
     T3CONbits.TGATE = 0; // Disable Gated Timer mode
-    T3CONbits.TCKPS = 0b11; //0b00 - Select 1:1 Prescalar
+    T3CONbits.TCKPS = 0b01; //0b00 - Select 1:1 Prescalar //01
     TMR3 = 0x00; // Clear timer register
-    PR3 = 500; // Load the period value
+    PR3 = 100; // Load the period value //50
     
     // Initialize Timer5 (SENSOR TRIGGER TIMER)
     T5CONbits.TON = 0; // Disable Timer
@@ -90,7 +135,7 @@ void InitPWM(void)
     OC1CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC1CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
 
-    // ---------- PWM2 Initialization (PITCH)----------
+    // ---------- PWM2 Initialization (PITCH) ----------
     RPOR3bits.RP70R = 0b010001; //Maps Output Compare 2 to output pin RP70 (pin 54)
     OC2CON1 = 0; // It is a good practice to clear off the control bits initially
     OC2CON2 = 0;
@@ -100,7 +145,7 @@ void InitPWM(void)
     OC2CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC2CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
     
-    // ---------- PWM3 Initialization THROTTLE ----------
+    // ---------- PWM3 Initialization (THROTTLE) ----------
     RPOR3bits.RP71R = 0b010010; //Maps Output Compare 3 to output pin RP71 (pin 55)
     OC3CON1 = 0; // It is a good practice to clear off the control bits initially
     OC3CON2 = 0;
@@ -154,27 +199,32 @@ void InitUART(void)
     
     // ---------- Declarations ----------
     #define FP 40000000
-    #define BAUDRATE 9600
+    #define BAUDRATE 38400 //9600
     #define BRGVAL ((FP/BAUDRATE)/16)-1
 
     TRISEbits.TRISE3 = 1; //input
     TRISEbits.TRISE4 = 0; //output
     
-    RPINR18bits.U1RXR = 0b1010011;//Maps U1RX to RPI83
+    RPINR18bits.U1RXR = 0b1010001;//Maps U1RX to RPI81
     
-    RPOR5bits.RP84R = 0b000001;// Maps U1TX to RP84    
+    RPOR5bits.RP82R = 0b000001;// Maps U1TX to RP82   
     
     // ---------- UART1 Initialization (Interfaces with GPS) ----------
     U1MODEbits.STSEL = 0; // 1-Stop bit
     U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
-    U1MODEbits.ABAUD = 0; // Auto-Baud disabled
+    U1MODEbits.ABAUD = 1; // Auto-Baud disabled
     U1MODEbits.BRGH = 0; // Standard-Speed mode
     U1BRG = BRGVAL; // Baud Rate setting for 9600
     U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is transmitted
-    U1STAbits.URXISEL1 = 0;
-    IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
+    //U1STAbits.URXISEL1 = 0;
+    
     U1MODEbits.UARTEN = 1; // Enable UART
+    IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
+    
+    
+    //U1STAbits.URXEN = 1; // Enable UART RX ???
     U1STAbits.UTXEN = 1; // Enable UART TX
+    IEC0bits.U1TXIE = 1; // Enable UART RX interrupt
 
     // ---------- UART2 Initialization (Interfaces with Camera) ----------
     U2MODEbits.STSEL = 0; // 1-Stop bit

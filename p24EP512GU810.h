@@ -13718,7 +13718,7 @@ typedef struct tagCNPDBBITS {
   unsigned CNPDB5:1;
   unsigned CNPDB6:1;
   unsigned CNPDB7:1;
-  unsigned CNPDB8:1;
+  unsigned CNPDB8:1;AN
   unsigned CNPDB9:1;
   unsigned CNPDB10:1;
   unsigned CNPDB11:1;
