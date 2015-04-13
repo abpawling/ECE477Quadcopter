@@ -20,6 +20,22 @@
 void InitApp(void)
 {
     
+    //Initialize Oscillator?
+    
+    /* Initialize digital pins and I/O direction */
+    InitAnalogFunctionality();
+    InitIO();
+    
+    /* Initialize peripherals */
+    InitPWM();
+    InitSPI();
+    InitUART();
+    InitTimers();
+    ///
+}
+
+void InitAnalogFunctionality(void)
+{
     //---------- Clear Analog Functionality ---------- 
     
     //GPS
@@ -31,50 +47,80 @@ void InitApp(void)
     ANSELEbits.ANSE4= 0; //clear analog functionality of pin 64 //
     
     //SENSORS
-    ANSELBbits.ANSB4 = 0; //clear analog functionality of pin //TODO clear interrupt functionality
-    ANSELBbits.ANSB3 = 0; //clear analog functionality of pin
-    ANSELBbits.ANSB2 = 0; //clear analog functionality of pin
-    ANSELBbits.ANSB1 = 0; //clear analog functionality of pin
+    ANSELBbits.ANSB5 = 0; //clear analog functionality of pin 11 //TODO clear interrupt functionality
+    ANSELBbits.ANSB4 = 0; //clear analog functionality of pin 12 //TODO clear interrupt functionality
+    ANSELBbits.ANSB3 = 0; //clear analog functionality of pin 13
+    ANSELBbits.ANSB2 = 0; //clear analog functionality of pin 14
+    ANSELBbits.ANSB1 = 0; //clear analog functionality of pin 15
+    //pin 16 (Trigger) ? 
     
     //SDCARD
+    ANSELEbits.ANSE5 = 0; //clear analog functionality of pin 1 
+    ANSELEbits.ANSE6 = 0; //clear analog functionality of pin 2 
+    ANSELEbits.ANSE7 = 0; //clear analog functionality of pin 3 
+    ANSELGbits.ANSG6 = 0; //clear analog functionality of pin 4 
+    ANSELGbits.ANSG7 = 0; //clear analog functionality of pin 5
+    ANSELGbits.ANSG9 = 0; //clear analog functionality of pin 8
     
     //CAMERA
+    ANSELBbits.ANSB15 = 0; //clear analog functionality of pin 30
+    // pin 31 should already be digital and not need configured
     
     //LCD SCREEN
+    // already digital pins
     
     //BATTERY MONITOR
     
-    //PUSHBUTTON
     
+    //PUSHBUTTON
+    // where is it connected?
+    
+    //LEDS
+    
+    
+    //ICSP?
+    
+    
+}
+
+void InitIO(void)
+{
     //---------- Set Port Direction ----------
-       
+    // 1 = input
+    // 0 = output
+    
     //GPS / COMPASS
-    //TRISE = ;    
+    TRISE = 0b0000000000001010; //set RE1, RE3 as inputs    
     
     //SENSORS
-    TRISB = 0b0000011111111110;
-    //TRISB = 0b0000000000111110; // set 5 RB0 as digital output and RB1-5 as inputs
+    //TRISB = 0b0000011111111110;
+    TRISB = 0b0000000000111110; // set RB0 as digital output and RB1-5 as inputs
     
     //FLIGHT CONTROLLER
     //TRISD = 0b0000000000000010;
-    TRISD = 0xFFFF;
+    TRISD = 0xFFFF; // all outputs
     
     //SDCARD
+    //G
     
     //CAMERA
     
+    
     //LCD SCREEN
+    
     
     //BATTERY MONITOR
     
+    
     //PUSHBUTTON
     
-    /* Initialize peripherals */
-    InitPWM();
-    InitSPI();
-    InitUART();
-    InitTimers();
-    ///
+    
+    //LEDS
+    
+    
+    //ICSP?
+    
+    
 }
 
 void InitTimers(void)
@@ -223,7 +269,7 @@ void InitUART(void)
     
     
     //U1STAbits.URXEN = 1; // Enable UART RX ???
-    U1STAbits.UTXEN = 1; // Enable UART TX
+    //U1STAbits.UTXEN = 1; // Enable UART TX
     IEC0bits.U1TXIE = 1; // Enable UART RX interrupt
 
     // ---------- UART2 Initialization (Interfaces with Camera) ----------

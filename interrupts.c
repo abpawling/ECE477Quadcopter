@@ -185,11 +185,11 @@ int * getSensorArray()
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
     int ReceiveBuff [120]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    int i,j = 0;
+    char i,j = 0;
     int temp = 0;
     //IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     
-    for(j = 0; j <= 120;j++)
+    for(j = 0; j < 120;j++)
     {
         ReceiveBuff[j] = 1;
     }
@@ -199,7 +199,10 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
         while(i < 120){//(ReceiveBuff != "\n")
             if(U1STAbits.URXDA == 1)
             {
-                ReceiveBuff[i] = U1RXREG;
+                /*if (U1RXREG == 0x00B5)
+                {
+                    ReceiveBuff[i] = U1RXREG;
+                }*/
                 if (ReceiveBuff[i] == '$' || ReceiveBuff[i] == "$")
                 {
                     temp = 1;
@@ -209,7 +212,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
             }
         }
     }
-    
+    ReceiveBuff[0] = ReceiveBuff[0];
     //U1TXREG = 'a'; // Transmit one character
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     

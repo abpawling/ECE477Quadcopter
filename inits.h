@@ -10,5 +10,6 @@ void InitUART(void);       /*UART*/
 void InitSPI(void);        /*SPI*/
 void InitPWM(void);        /*PWM*/
 void InitTimers(void);     /*Timers*/
-
+void InitAnalogFunctionality(void); /*Set functionality for analog/digital pins*/
+void InitIO(void); /*Set direction of pins*/
 
