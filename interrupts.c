@@ -177,6 +177,8 @@ int * getSensorArray()
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
+//TODO: create delay_ms())
+
 /******************************************************************************
  * 
  * UART1 ISR - U1RX INTERRUPT
@@ -184,7 +186,7 @@ int * getSensorArray()
  ******************************************************************************/
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    int ReceiveBuff [120]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    char ReceiveBuff [120]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     char i,j = 0;
     int temp = 0;
     //IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
@@ -213,6 +215,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
         }
     }
     ReceiveBuff[0] = ReceiveBuff[0];
+    
     //U1TXREG = 'a'; // Transmit one character
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     

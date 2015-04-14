@@ -1,6 +1,6 @@
 /* 
  * File:   inits.h
- * Author: root
+ * Author: Zach Schaffter
  *
  * Created on March 31, 2015, 9:34 PM
  */

@@ -92,17 +92,8 @@ waypoint * InitCollisionList(int coord)
      {
         //rotate until facing orientation
 
-     }*/
-
-    //generate linked list for traversal
-    /*for (i = 0;i <= 5;i++)
-    {
-        current = (waypoint* )malloc(sizeof(waypoint));
-        current->coordinate = i//data + 4;
-        current->next = head;
-        head = current;
-    }
-
-    current = head;*/
-    
+     }*/    
  }
+ 
+ //TODO: create delay_ms())
+ 
