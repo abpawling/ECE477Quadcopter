@@ -22,6 +22,7 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
 #include "inits.h"
+#include "utils.h"
 //#include "p24EP512GP806.h"
 #include "p24EP512GU810.h"
 

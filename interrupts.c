@@ -19,9 +19,10 @@
 #include <stdbool.h>
 
 #include "LinkedList.h"       /* Includes true/false definition */
-#include "user.h"          /* User funct/params, such as InitApp              */
+#include "user.h"          /* User funct/params, such as InitApp */
+#include "utils.h"
 //#include "p24EP512GP806.h"
-//#include "p24EP512GU810.h"
+#include "p24EP512GU810.h"
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
 /******************************************************************************/
@@ -177,7 +178,7 @@ int * getSensorArray()
 /* Interrupt Routines                                                         */
 /******************************************************************************/
 
-//TODO: create delay_ms())
+
 
 /******************************************************************************
  * 
@@ -323,3 +324,25 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
     armCount++;
     IFS1bits.T4IF = 0; //Clear Timer4 interrupt flag
 }
+
+/******************************************************************************
+ * 
+ * DMA0 ISR - SPI Transmission
+ * 
+ ******************************************************************************/
+void __attribute__((__interrupt__)) _DMA0Interrupt(void)
+{
+    static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
+    if(BufferCount == 0)
+    {
+        //TxData(BufferA); // Transmit SPI data in DMA RAM Primary buffer TODO: ??
+        
+    }
+    else
+    {
+        //TxData(BufferB); // Transmit SPI data in DMA RAM Secondary buffer TODO: ??
+        
+    }
+        BufferCount ^= 1;
+        IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
+    }

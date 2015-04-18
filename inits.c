@@ -16,6 +16,7 @@
 #endif
 
 #include "inits.h"            /* variables/params used by inits.c */
+#include "utils.h"
 
 void InitApp(void)
 {
@@ -27,11 +28,30 @@ void InitApp(void)
     InitIO();
     
     /* Initialize peripherals */
+    InitLCD();
     InitPWM();
     InitSPI();
     InitUART();
     InitTimers();
     ///
+}
+
+void InitLCD(void)
+{
+    //char LCDON = 0x0F;     //LCD initialization command
+    //char LCDCLR = 0x01;     //LCD clear display command
+    //char TWOLINE = 0x38;     //LCD 2-line enable command
+    //char CURMOV = 0xFE;     //LCD cursor move instruction
+    //char LINE1 = 0x80;     //LCD line 1 cursor position
+    //char LINE2 = 0xC0;     //LCD line 2 cursor position
+    
+    //TODO: look up LCD initializations
+    //PTT_PTT4 = 1; // pull LCDCLK high (idle)
+    //PTT_PTT3 = 0; // pull R/W low (write state)
+    //sendI(LCDON); // turn on LCD (LCDON instruction)
+    //sendI(TWOLINE); // enable two-line mode (TWOLINE instruction)
+    //sendI(LCDCLR); // clear LCD (LCDCLR instruction) 
+    //wait(); // wait so that the LCD can wake up
 }
 
 void InitAnalogFunctionality(void)
@@ -69,7 +89,7 @@ void InitAnalogFunctionality(void)
     // pin 31 should already be digital and not need configured
     
     //BATTERY MONITOR 
-    //TODO:
+    //already digital pins
     
     //PUSHBUTTON
     ANSELGbits.ANSG9 = 0; //clear analog functionality of RG9 //pin 8
@@ -132,7 +152,8 @@ void InitIO(void)
     TRISFbits.TRISF4 = 1; //set RF4 as input //pin 31 (Camera RX / Micro TX)
     
     //BATTERY MONITOR
-    //TODO:
+    TRISFbits.TRISF2 = 1; //set RF2 as input //pin 34 (SMBD) //TODO: check
+    TRISFbits.TRISF3 = 0; //set RF3 as output //pin 33 (SMBC)
     
     //PUSHBUTTON
     TRISGbits.TRISG9 = 1; //set RG9 as input //pin 8
@@ -256,7 +277,7 @@ void InitPWM(void)
 
 void InitSPI(void)
 {
-    // ---------- SPI1 Initialization (For SD Card) ----------
+    // ---------- SPI1 Initialization Master Mode (SD CARD) ----------
     IFS0bits.SPI1IF = 0; // Clear the Interrupt flag
     IEC0bits.SPI1IE = 0; // Disable the interrupt
     // SPI1CON1 Register Settings
@@ -274,9 +295,44 @@ void InitSPI(void)
     IFS0bits.SPI1IF = 0; // Clear the Interrupt flag
     IEC0bits.SPI1IE = 1; // Enable the interrupt
     
-    // ---------- SPI2 Initialization ----------
-    // ---------- SPI3 Initialization ----------
-    // ---------- SPI4 Initialization ----------
+    
+
+    // ---------- SPI2 Initialization Master Mode (LCD SCREEN) ----------
+    IFS2bits.SPI2IF = 0; // Clear the Interrupt flag
+    IEC2bits.SPI2IE = 0; // Disable the interrupt
+    // SPI1CON1 Register Settings
+    SPI2CON1bits.DISSCK = 0; // Internal serial clock is enabled
+    SPI2CON1bits.DISSDO = 0; // SDOx pin is controlled by the module
+    SPI2CON1bits.MODE16 = 1; // Communication is word-wide (16 bits)
+    SPI2CON1bits.MSTEN = 1; // Master mode enabled
+    SPI2CON1bits.SMP = 0; // Input data is sampled at the middle of data output time
+    SPI2CON1bits.CKE = 0; // Serial output data changes on transition from
+    // Idle clock state to active clock state
+    SPI2CON1bits.CKP = 0; // Idle state for clock is a low level;
+    // active state is a high level
+    SPI2STATbits.SPIEN = 1; // Enable SPI module
+    // Interrupt Controller Settings
+    IFS2bits.SPI2IF = 0; // Clear the Interrupt flag
+    
+    // Force First Word After Enabling SPI
+    DMA0REQbits.FORCE=1;
+    while (DMA0REQbits.FORCE == 1);
+    IEC2bits.SPI2IE = 1; // Enable the interrupt
+    
+    // DMA0: TX
+    unsigned int TxBufferA[16] __attribute__((space(xmemory)));
+    unsigned int TxBufferB[16] __attribute__((space(xmemory)));
+    IFS0bits.DMA0IF = 0;
+    IEC0bits.DMA0IE = 1;
+    //DMACS0 = 0; //TODO: what is this?
+    DMA0CON = 0x2002;
+    DMA0STAL = (unsigned int)&TxBufferA;
+    DMA0STAH = (unsigned int)&TxBufferB;
+    DMA0PAD = (volatile unsigned int) &SPI1BUF;
+    DMA0CNT = 15;
+    DMA0REQ = 0x000A;
+    DMA0CONbits.CHEN = 1;
+    
 }
 
 void InitUART(void)
