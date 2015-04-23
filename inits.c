@@ -17,6 +17,7 @@
 
 #include "inits.h"            /* variables/params used by inits.c */
 #include "utils.h"
+#include "system.h"
 
 void InitApp(void)
 {
@@ -38,13 +39,29 @@ void InitApp(void)
 
 void InitLCD(void)
 {
+    /* ----- USAGE ----- 
+    *      R/W = D4
+    *      RS = C14
+    *      E = C13
+    *      Contrast = D5
+    *      [DB7:DB0] = {D9,D8,D10,D1,D11,D2,D0,D3} 
+    */
+    
     //char LCDON = 0x0F;     //LCD initialization command
-    //char LCDCLR = 0x01;     //LCD clear display command
-    //char TWOLINE = 0x38;     //LCD 2-line enable command
-    //char CURMOV = 0xFE;     //LCD cursor move instruction
+    //char LCDCLR = 0x01;    //LCD clear display command
+    //char TWOLINE = 0x38;   //LCD 2-line enable command
+    //char CURMOV = 0xFE;    //LCD cursor move instruction
     //char LINE1 = 0x80;     //LCD line 1 cursor position
     //char LINE2 = 0xC0;     //LCD line 2 cursor position
+    char CLEAR = 0x01;
+    char RET_HOME = 0x02;
+    char CONFIG = 0b1111; //Display ON, cursor ON, blink ON
     
+    sendI(CLEAR);
+    wait();
+    sendI(RET_HOME);
+    wait();
+    sendI(CONFIG);
     //TODO: look up LCD initializations
     //PTT_PTT4 = 1; // pull LCDCLK high (idle)
     //PTT_PTT3 = 0; // pull R/W low (write state)
@@ -99,8 +116,15 @@ void InitAnalogFunctionality(void)
     ANSELBbits.ANSB13 = 0; //clear analog functionality of RB13 //pin 28
     ANSELBbits.ANSB14 = 0; //clear analog functionality of RB14 //pin 29
     //TODO: pin 32 is already digital?
+    //ANSELFbits.ANSF5 = 0;
     
     //LCD SCREEN
+    //R/W = D4
+    //RS = C14
+    //E = C13
+    //Contrast = D5
+    //[DB7:DB0] = {D9,D8,D10,D1,D11,D2,D0,D3}
+    
     // already digital pins
     
     //ICSP TODO: check
@@ -139,7 +163,7 @@ void InitIO(void)
     TRISDbits.TRISD6 = 0; //set RD6 as output // pin 54 (PITCH)
     TRISDbits.TRISD7 = 0; //set RD7 as output // pin 55 (THROTTLE)
     TRISFbits.TRISF0 = 0; //set RF0 as output // pin 58 (YAW)
-    TRISFbits.TRISF1 = 0; //set RF1 as output // pin 59 (ROLL))
+    TRISFbits.TRISF1 = 0; //set RF1 as output // pin 59 (ROLL)
     
     //SDCARD
     TRISEbits.TRISE7 = 1; //set RE7 as input //pin 3 (MISO)
@@ -149,7 +173,7 @@ void InitIO(void)
     
     //CAMERA
     TRISBbits.TRISB15 = 1; //set RB15 as input //pin 30 (Camera TX / Micro RX)
-    TRISFbits.TRISF4 = 1; //set RF4 as input //pin 31 (Camera RX / Micro TX)
+    TRISFbits.TRISF4 = 0; //set RF4 as output //pin 31 (Camera RX / Micro TX)
     
     //BATTERY MONITOR
     TRISFbits.TRISF2 = 1; //set RF2 as input //pin 34 (SMBD) //TODO: check
@@ -159,25 +183,30 @@ void InitIO(void)
     TRISGbits.TRISG9 = 1; //set RG9 as input //pin 8
     
     //LEDS
-    TRISBbits.TRISB12 = 0; //set RB12 as input //pin 27
-    TRISBbits.TRISB13 = 0; //set RB12 as input //pin 28
-    TRISBbits.TRISB14 = 0; //set RB12 as input //pin 29
-    TRISFbits.TRISF5 = 0; //set RB12 as input //pin 32
+    TRISBbits.TRISB12 = 0; //set RB12 as output //pin 27 (yellow))
+    TRISBbits.TRISB13 = 0; //set RB13 as output //pin 28
+    TRISBbits.TRISB14 = 0; //set RB14 as output //pin 29
+    TRISFbits.TRISF5 = 0; //set RF5 as output //pin 32
     
     //LCD SCREEN
-    TRISDbits.TRISD5 = 0; //set RD5 as output //pin 53
-    TRISDbits.TRISD4 = 0; //set RD4 as output //pin 52
-    TRISDbits.TRISD3 = 0; //set RD3 as output //pin 51
-    TRISDbits.TRISD2 = 0; //set RD2 as output //pin 50
-    TRISDbits.TRISD1 = 0; //set RD1 as output //pin 49
+    //R/W = D4
+    //RS = C14
+    //E = C13
+    //Contrast = D5
+    //[DB7:DB0] = {D9,D8,D10,D1,D11,D2,D0,D3}
+    TRISDbits.TRISD5 = 0; //set RD5 as output //pin 53 (LCD pin 3 / Contrast Adjust)
+    TRISDbits.TRISD4 = 0; //set RD4 as output //pin 52 (LCD: pin 5 / R/W)
+    TRISDbits.TRISD3 = 0; //set RD3 as output //pin 51 (LCD: pin 7 / DB0)
+    TRISDbits.TRISD2 = 0; //set RD2 as output //pin 50 (LCD: pin 9 / DB2)
+    TRISDbits.TRISD1 = 0; //set RD1 as output //pin 49 (LCD: pin 11 / DB4)
 
-    TRISCbits.TRISC14 = 0; //set RC14 as output //pin 48
-    TRISCbits.TRISC13 = 0; //set RC13 as output //pin 47
-    TRISDbits.TRISD0 = 0; //set RD0 as output //pin 46
-    TRISDbits.TRISD11 = 0; //set RD11 as output //pin 45
-    TRISDbits.TRISD10 = 0; //set RD10 as output //pin 44
-    TRISDbits.TRISD9 = 0; //set RD9 as output //pin 43
-    TRISDbits.TRISD8 = 0; //set RD8 as output //pin 42
+    TRISCbits.TRISC14 = 0; //set RC14 as output //pin 48 (LCD: pin 4 / RS)
+    TRISCbits.TRISC13 = 0; //set RC13 as output //pin 47 (LCD: pin 6 / E)
+    TRISDbits.TRISD0 = 0; //set RD0 as output //pin 46 (LCD: pin 8 / DB1)
+    TRISDbits.TRISD11 = 0; //set RD11 as output //pin 45 (LCD: pin 10 / DB3)
+    TRISDbits.TRISD10 = 0; //set RD10 as output //pin 44 (LCD: pin 12 / DB5)
+    TRISDbits.TRISD9 = 0; //set RD9 as output //pin 43 (LCD: pin 14 / DB7)
+    TRISDbits.TRISD8 = 0; //set RD8 as output //pin 42 (LCD: pin 13 / DB6)
     
     //TODO: ICSP?
     
@@ -192,7 +221,7 @@ void InitTimers(void)
     T4CONbits.TGATE = 0; // Disable Gated Timer mode
     T4CONbits.TCKPS = 0b11; //0b00 - Select 1:1 Prescalar
     TMR4 = 0x00; // Clear timer register
-    PR4 = 50000; // Load the period value
+    PR4 = 30000; // Load the period value
     
     // Initialize Timer3 (SENSOR ECHO TIMER)
     T3CONbits.TON = 0; // Disable Timer
@@ -232,11 +261,11 @@ void InitPWM(void)
 {
     // ---------- PWM1 Initialization (ROLL) ----------
     //RPOR2bits.RP69R = 0b010000; //Maps Output Compare 1 to output pin RP69 (pin 53)
-    RPOR7bits.RP97R = 0b010000; //Maps Output Compare 1 to output pin RP96 (pin 59)    
+    RPOR7bits.RP97R = 0b010000; //Maps Output Compare 1 to output pin RP97 (pin 59)    
     OC1CON1 = 0; // It is a good practice to clear off the control bits initially
     OC1CON2 = 0;
     OC1CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC1R = 4000; // ROLL This is just a typical number, user must calculate based on the waveform requirements and the system clock
+    OC1R = 5500; // ROLL This is just a typical number, user must calculate based on the waveform requirements and the system clock
     OC1RS = 8000; // Determines the Period
     OC1CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC1CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
@@ -246,7 +275,7 @@ void InitPWM(void)
     OC2CON1 = 0; // It is a good practice to clear off the control bits initially
     OC2CON2 = 0;
     OC2CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC2R = 4000; // PITCH This is just a typical number, user must calculate based on the waveform requirements and the system clock
+    OC2R = 5500; // PITCH This is just a typical number, user must calculate based on the waveform requirements and the system clock
     OC2RS = 8000; // Determines the Period
     OC2CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC2CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
@@ -266,7 +295,7 @@ void InitPWM(void)
     OC4CON1 = 0; // It is a good practice to clear off the control bits initially
     OC4CON2 = 0;
     OC4CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC4R = 4000; // YAW This is just a typical number, user must calculate based on the waveform requirements and the system clock
+    OC4R = 5500; // YAW This is just a typical number, user must calculate based on the waveform requirements and the system clock
     OC4RS = 8000; // Determines the Period
     OC4CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC4CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
@@ -320,7 +349,7 @@ void InitSPI(void)
     IEC2bits.SPI2IE = 1; // Enable the interrupt
     
     // DMA0: TX
-    unsigned int TxBufferA[16] __attribute__((space(xmemory)));
+    /*unsigned int TxBufferA[16] __attribute__((space(xmemory)));
     unsigned int TxBufferB[16] __attribute__((space(xmemory)));
     IFS0bits.DMA0IF = 0;
     IEC0bits.DMA0IE = 1;
@@ -331,52 +360,56 @@ void InitSPI(void)
     DMA0PAD = (volatile unsigned int) &SPI1BUF;
     DMA0CNT = 15;
     DMA0REQ = 0x000A;
-    DMA0CONbits.CHEN = 1;
+    DMA0CONbits.CHEN = 1;*/
     
 }
 
 void InitUART(void)
-{
-    
-    // ---------- Declarations ----------
-    #define FP 40000000
-    #define BAUDRATE 38400 //9600
-    #define BRGVAL ((FP/BAUDRATE)/16)-1
-
-    TRISEbits.TRISE3 = 1; //input
-    TRISEbits.TRISE4 = 0; //output
-    
-    RPINR18bits.U1RXR = 0b1010001;//Maps U1RX to RPI81
-    
-    RPOR5bits.RP82R = 0b000001;// Maps U1TX to RP82   
-    
+{   
+       
     // ---------- UART1 Initialization (Interfaces with GPS) ----------
+    #define FP FCY//4000000//8000000
+    #define BAUDRATE1 9600//38400
+    #define BRGVAL1 ((FP/BAUDRATE1)/16)-1
+    
+    RPINR18bits.U1RXR = 0b1010001; //Maps U1RX to RPI81 (pin 61)
+    RPOR5bits.RP82R = 0b000001; // Maps U1TX to RP82  (pin 62)
+    
     U1MODEbits.STSEL = 0; // 1-Stop bit
     U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
     U1MODEbits.ABAUD = 1; // Auto-Baud disabled
     U1MODEbits.BRGH = 0; // Standard-Speed mode
-    U1BRG = BRGVAL; // Baud Rate setting for 9600
+    U1BRG = BRGVAL1;//U1BRG;//BRGVAL1; // Baud Rate setting
     U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is transmitted
-    //U1STAbits.URXISEL1 = 0;
+    U1STAbits.URXISEL1 = 0;
     
     U1MODEbits.UARTEN = 1; // Enable UART
+    
+    
     IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
+    IFS0bits.U1RXIF = 0; //Reset interrupt flag
     
     
     //U1STAbits.URXEN = 1; // Enable UART RX ???
     //U1STAbits.UTXEN = 1; // Enable UART TX
-    IEC0bits.U1TXIE = 1; // Enable UART RX interrupt
+    //IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
 
     // ---------- UART2 Initialization (Interfaces with Camera) ----------
+    #define BAUDRATE2 9600
+    #define BRGVAL2 ((FP/BAUDRATE2)/16)-1
+
+    RPINR19bits.U2RXR = 0b0101111; //Maps U2RX to RPI47 (pin 30)
+    RPOR9bits.RP100R = 0b1100100; // Maps U2TX to RP100  (pin 31)
+    
     U2MODEbits.STSEL = 0; // 1-Stop bit
     U2MODEbits.PDSEL = 0; // No Parity, 8-Data bits
     U2MODEbits.ABAUD = 0; // Auto-Baud disabled
     U2MODEbits.BRGH = 0; // Standard-Speed mode
-    U2BRG = BRGVAL; // Baud Rate setting for 9600
+    U2BRG = BRGVAL2; // Baud Rate setting
     U2STAbits.URXISEL0 = 0; // Interrupt after one RX character is transmitted
     U2STAbits.URXISEL1 = 0;
-    IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
     U2MODEbits.UARTEN = 1; // Enable UART
     U2STAbits.UTXEN = 1; // Enable UART TX
+    //IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
          
 }

@@ -185,37 +185,37 @@ int * getSensorArray()
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
+int k;
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    char ReceiveBuff [120]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    char i,j = 0;
-    int temp = 0;
-    //IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
+    char ReceiveBuff [100]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    //int i,j = 0;
     
-    for(j = 0; j < 120;j++)
+    
+    /*for(j = 0; j < 100;j++)
     {
         ReceiveBuff[j] = 1;
-    }
+    }*/
     
-    if (IFS0bits.U1RXIF)
-    {
-        while(i < 120){//(ReceiveBuff != "\n")
-            if(U1STAbits.URXDA == 1)
-            {
-                /*if (U1RXREG == 0x00B5)
-                {
-                    ReceiveBuff[i] = U1RXREG;
-                }*/
-                if (ReceiveBuff[i] == '$' || ReceiveBuff[i] == "$")
-                {
-                    temp = 1;
-                }
-                i++;
+    //if (IFS0bits.U1RXIF)
+    //{
+        //if (U1RXREG == '$' || U1RXREG == "$"){
+            //while(i < 100){//(ReceiveBuff != "\n")
+                //if(U1STAbits.URXDA == 1)
+                //{
+                //if (ReceiveBuff[i] == ',' || ReceiveBuff[i] == ",")
+                //{
+                    ReceiveBuff[k] = U1RXREG;
+                    k++;
+                //}
 
-            }
-        }
-    }
-    ReceiveBuff[0] = ReceiveBuff[0];
+                 //}
+            //}
+       // }
+    //}
+    
+   // ReceiveBuff[0] = ReceiveBuff[0];
+    
     
     //U1TXREG = 'a'; // Transmit one character
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
@@ -312,10 +312,10 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
 {
     
-    if (armCount >= 1)
+    if (armCount >= 4)
     {
-        OC1R = 4000; //ROLL
-        OC3R = 4000; //THROTTLE
+        OC4R = 5500; //YAW To neutral 
+        OC3R = 5000; //THROTTLE
 
         //IEC1bits.T4IE = 1; // Enable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
@@ -330,7 +330,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
  * DMA0 ISR - SPI Transmission
  * 
  ******************************************************************************/
-void __attribute__((__interrupt__)) _DMA0Interrupt(void)
+/*void __attribute__((__interrupt__)) _DMA0Interrupt(void)
 {
     static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
     if(BufferCount == 0)
@@ -345,4 +345,5 @@ void __attribute__((__interrupt__)) _DMA0Interrupt(void)
     }
         BufferCount ^= 1;
         IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
-    }
+}
+  */

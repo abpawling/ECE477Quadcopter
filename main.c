@@ -48,7 +48,7 @@ int16_t main(void)
     
     int push = 1; //TODO set up pushbutton
     int * sensorArray;
-    int finalDest;
+    int finalDest = 5;
     bool atDestination;
     
     if (push) //Pushbutton
@@ -67,25 +67,41 @@ int16_t main(void)
         sensorArray = getSensorArray();
         atDestination = Navigate(finalDest,sensorArray); //change flight path using sensor data
         
-        char ReceivedChar = 0;
-        int a;
+        char ReceivedChar [100];
+        int a,i = 0;
+        char Temp;
+        
+        //PORTBbits.RB12 = 1; //yellow LED
+        //PORTBbits.RB13 = 1; //green
+        //PORTBbits.RB14 = 1; //green
+        //PORTFbits.RF5 = 1; //doesn't work
         
         /* Check for receive errors */
         if(U1STAbits.FERR == 1)
         {
+            a = 2;
             continue;
         }
         // Must clear the overrun error to keep UART receiving 
         if(U1STAbits.OERR == 1)
         {
+            
             U1STAbits.OERR = 0;
             continue;
         }
+        
+        /*while(IFS0bits.U1RXIF == 0){
+            Temp = U1RXREG;
+            IFS0bits.U1RXIF = 1;
+        }*/
         // Get the data
         if(U1STAbits.URXDA == 1)
         {
             a = 1;
-            ReceivedChar = U1RXREG;
+            /*ReceivedChar[i] = U1RXREG;
+            i++;
+            i = 1 % 100;
+            */
         }
        
         //printf("Receive Data: %s",ReceivedChar);

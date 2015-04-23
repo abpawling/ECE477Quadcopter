@@ -34,7 +34,7 @@
  ******************************************************************************/
 void Arm()
 {
-    OC1R = 7000; //ROLL
+    OC4R = 7000; //YAW
     OC3R = 4000; //7000; //THROTTLE
 }
 
@@ -94,6 +94,4 @@ waypoint * InitCollisionList(int coord)
 
      }*/    
  }
- 
- //TODO: create delay_ms())
  

@@ -66,7 +66,9 @@
 #pragma config FPWRT = PWR128           // Power-on Reset Timer Value Select bits (128ms)
 #pragma config BOREN = ON               // Brown-out Reset (BOR) Detection Enable bit (BOR is enabled)
 #pragma config ALTI2C1 = OFF            // Alternate I2C pins for I2C1 (SDA1/SCK1 pins are selected as the I/O pins for I2C1)
-#pragma config ALTI2C2 = OFF            // Alternate I2C pins for I2C2 (SDA2/SCK2 pins are selected as the I/O pins for I2C2)
+//#pragma config ALTI2C2 = OFF            // Alternate I2C pins for I2C2 (SDA2/SCK2 pins are selected as the I/O pins for I2C2)
+
+//TODO: uncomment above ?
 
 // FICD
 #pragma config ICS = PGD1               // ICD Communication Channel Select bits (Communicate on PGEC1 and PGED1)
