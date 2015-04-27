@@ -24,8 +24,8 @@
 #include "LinkedList.h"
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 
-//#include "p24EP512GP806.h"
-#include "p24EP512GU810.h"
+#include "p24EP512GP806.h"
+//#include "p24EP512GU810.h"
 
 /******************************************************************************
  * 
@@ -68,7 +68,6 @@ waypoint * InitCollisionList(int coord)
  ******************************************************************************/
  bool Navigate(int finalDest, int* sensorArray)
 {
-    //declarations
      //char orientation;
      
     bool frontFlag = 0;

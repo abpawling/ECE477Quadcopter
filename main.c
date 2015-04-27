@@ -23,8 +23,8 @@
 #include "user.h"          /* User funct/params, such as InitApp              */
 #include "inits.h"
 #include "utils.h"
-//#include "p24EP512GP806.h"
-#include "p24EP512GU810.h"
+#include "p24EP512GP806.h"
+//#include "p24EP512GU810.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -50,6 +50,7 @@ int16_t main(void)
     int * sensorArray;
     int finalDest = 5;
     bool atDestination;
+    int heartbeatCount = 0;
     
     if (push) //Pushbutton
     {
@@ -69,11 +70,26 @@ int16_t main(void)
         
         char ReceivedChar [100];
         int a,i = 0;
-        char Temp;
+        //char Temp;
         
-        //PORTBbits.RB12 = 1; //yellow LED
-        //PORTBbits.RB13 = 1; //green
-        //PORTBbits.RB14 = 1; //green
+        if (heartbeatCount >= 8000)
+        {
+            PORTBbits.RB12 = 1; //yellow heartbeat LED
+            if (heartbeatCount >= 10000)
+            {
+                heartbeatCount = 0;
+                U1TXREG = 0b01010101;
+            }
+        }
+        else
+        {
+            PORTBbits.RB12 = 0; //yellow heartbeat LED
+        }
+        heartbeatCount++;
+        
+        //PORTBbits.RB12 = 1; //yellow heartbeat LED
+        //PORTBbits.RB13 = 1; //green LED
+        //PORTBbits.RB14 = 1; //green LED
         //PORTFbits.RF5 = 1; //doesn't work
         
         /* Check for receive errors */
@@ -98,13 +114,7 @@ int16_t main(void)
         if(U1STAbits.URXDA == 1)
         {
             a = 1;
-            /*ReceivedChar[i] = U1RXREG;
-            i++;
-            i = 1 % 100;
-            */
         }
-       
-        //printf("Receive Data: %s",ReceivedChar);
         
     }
     

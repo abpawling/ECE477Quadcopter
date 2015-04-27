@@ -21,8 +21,8 @@
 #include "LinkedList.h"       /* Includes true/false definition */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "utils.h"
-//#include "p24EP512GP806.h"
-#include "p24EP512GU810.h"
+#include "p24EP512GP806.h"
+//#include "p24EP512GU810.h"
 /******************************************************************************/
 /* Interrupt Vector Options                                                   */
 /******************************************************************************/
@@ -161,7 +161,7 @@
 //int* getSensorArray(int);
 
 #define SENSOR_AMOUNT 6
-
+#define CLEAR 0x001
 
 
 int armCount = 0; //global var to get proper ARM timing of flight controller
@@ -185,33 +185,48 @@ int * getSensorArray()
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
-int k;
+int h,k,j = 0;
+char ReceiveBuff [100];
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    char ReceiveBuff [100]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    //char ReceiveBuff [100]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     //int i,j = 0;
-    
-    
-    /*for(j = 0; j < 100;j++)
+    if (h == 0)
     {
-        ReceiveBuff[j] = 1;
-    }*/
+        h = 1;
+        for(j = 0; j <= 100;j++)
+        {
+            ReceiveBuff[j] = 1;
+        }
+    }
     
     //if (IFS0bits.U1RXIF)
     //{
-        //if (U1RXREG == '$' || U1RXREG == "$"){
-            //while(i < 100){//(ReceiveBuff != "\n")
-                //if(U1STAbits.URXDA == 1)
-                //{
-                //if (ReceiveBuff[i] == ',' || ReceiveBuff[i] == ",")
-                //{
+                if(U1STAbits.URXDA == 1)
+                {
+                    //if(U1STAbits.FERR != 1)
+                    //{                
+                    
                     ReceiveBuff[k] = U1RXREG;
+                    /*LCDWriteInstr(CLEAR);
+                    LCDWriteData(ReceiveBuff[0]);
+                    LCDWriteData(ReceiveBuff[1]);
+                    LCDWriteData(ReceiveBuff[2]);
+                    LCDWriteData(ReceiveBuff[3]);
+                    LCDWriteData(ReceiveBuff[4]);
+                    LCDWriteData(ReceiveBuff[5]);
+                    LCDWriteData(ReceiveBuff[6]);
+                    LCDWriteData(ReceiveBuff[7]);*/
                     k++;
+                    if(k == 100)
+                    {
+
+                        k=0;
+                          
+                    }
                 //}
 
-                 //}
-            //}
-       // }
+                 }
     //}
     
    // ReceiveBuff[0] = ReceiveBuff[0];

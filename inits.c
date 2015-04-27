@@ -23,52 +23,43 @@ void InitApp(void)
 {
     
     //Initialize Oscillator?
+  
     
     /* Initialize digital pins and I/O direction */
     InitAnalogFunctionality();
     InitIO();
     
     /* Initialize peripherals */
-    InitLCD();
+    
     InitPWM();
     InitSPI();
     InitUART();
     InitTimers();
+    InitLCD();
     ///
 }
 
+
+
 void InitLCD(void)
 {
-    /* ----- USAGE ----- 
-    *      R/W = D4
-    *      RS = C14
-    *      E = C13
-    *      Contrast = D5
-    *      [DB7:DB0] = {D9,D8,D10,D1,D11,D2,D0,D3} 
-    */
+    #define CLEAR 0x001
+    #define RET_HOME 0x002
+    #define CONFIG 0b0000001111 //Display ON, cursor ON, blink ON
+
+    char * testmsg1 = "123456789abcdefghijklmnopqrstuvwxyz";
+    char * testmsg2 = "are cool!";
     
-    //char LCDON = 0x0F;     //LCD initialization command
-    //char LCDCLR = 0x01;    //LCD clear display command
-    //char TWOLINE = 0x38;   //LCD 2-line enable command
-    //char CURMOV = 0xFE;    //LCD cursor move instruction
-    //char LINE1 = 0x80;     //LCD line 1 cursor position
-    //char LINE2 = 0xC0;     //LCD line 2 cursor position
-    char CLEAR = 0x01;
-    char RET_HOME = 0x02;
-    char CONFIG = 0b1111; //Display ON, cursor ON, blink ON
+    LATDbits.LATD5 =  0; //Contrast
+    PMD3bits.RTCCMD = 1; //High disables RTCC module on port RD8    
     
-    sendI(CLEAR);
-    wait();
-    sendI(RET_HOME);
-    wait();
-    sendI(CONFIG);
-    //TODO: look up LCD initializations
-    //PTT_PTT4 = 1; // pull LCDCLK high (idle)
-    //PTT_PTT3 = 0; // pull R/W low (write state)
-    //sendI(LCDON); // turn on LCD (LCDON instruction)
-    //sendI(TWOLINE); // enable two-line mode (TWOLINE instruction)
-    //sendI(LCDCLR); // clear LCD (LCDCLR instruction) 
-    //wait(); // wait so that the LCD can wake up
+    LCDWrite(CLEAR,0,0);
+    LCDWrite(RET_HOME,0,0);
+    LCDWrite(CONFIG,0,0);
+    LCDWrite(TWOLINE,0,0);
+    printMsgToLCD(testmsg1,LINE1);
+    printMsgToLCD(testmsg2,LINE2);
+    
 }
 
 void InitAnalogFunctionality(void)
@@ -125,7 +116,32 @@ void InitAnalogFunctionality(void)
     //Contrast = D5
     //[DB7:DB0] = {D9,D8,D10,D1,D11,D2,D0,D3}
     
-    // already digital pins
+    ANSELCbits.ANSC13 = 0;//clear analog functionality of RC13 //pin 47
+    ANSELCbits.ANSC14 = 0; //clear analog functionality of RC14 //pin 48
+    IEC0bits.INT0IE = 0; //disables external interrupt of RD0 (pin 46)
+    CNENDbits.CNIED0 = 0; //disable input detection interrupt
+    CNENDbits.CNIED1 = 0; //disable input detection interrupt
+    CNENDbits.CNIED2 = 0; //disable input detection interrupt
+    CNENDbits.CNIED3 = 0; //disable input detection interrupt
+    CNENDbits.CNIED4 = 0; //disable input detection interrupt
+    CNENDbits.CNIED5 = 0; //disable input detection interrupt
+    CNENDbits.CNIED6 = 0; //disable input detection interrupt
+    CNENDbits.CNIED7 = 0; //disable input detection interrupt
+    CNENDbits.CNIED8 = 0; //disable input detection interrupt
+    CNENDbits.CNIED9 = 0; //disable input detection interrupt
+    CNENDbits.CNIED10 = 0; //disable input detection interrupt
+    CNENDbits.CNIED11 = 0; //disable input detection interrupt
+   
+    ODCDbits.ODCD0 = 0; //not open drain
+    ODCDbits.ODCD1 = 0; //not open drain
+    ODCDbits.ODCD2 = 0; //not open drain
+    ODCDbits.ODCD3 = 0; //not open drain
+    ODCDbits.ODCD4 = 0; //not open drain
+    ODCDbits.ODCD5 = 0; //not open drain
+    ODCDbits.ODCD8 = 0; //not open drain
+    ODCDbits.ODCD9 = 0; //not open drain
+    ODCDbits.ODCD10 = 0; //not open drain
+    ODCDbits.ODCD11 = 0; //not open drain    
     
     //ICSP TODO: check
     ANSELBbits.ANSB6 = 0; //clear analog functionality of RB6 //pin 17
@@ -142,7 +158,7 @@ void InitIO(void)
     //GPS
     //TRISE = 0b0000000000001010; //set RE1, RE3 as inputs
     TRISEbits.TRISE1 = 1; //set RE1 as input // pin 61 (GPS TX / Micro RX)
-    TRISEbits.TRISE2 = 1; //set RE2 as output // pin 62 (GPS RX / Micro TX)
+    TRISEbits.TRISE2 = 0; //set RE2 as output // pin 62 (GPS RX / Micro TX)
     
     //COMPASS
     TRISEbits.TRISE3 = 1; //set RE3 as input // pin 63 (SDA)
@@ -215,6 +231,8 @@ void InitIO(void)
 
 void InitTimers(void)
 {   
+    T1CONbits.TCS = 0; //Use internal clock for Timer1
+            
     // Initialize Timer4 (FLIGHT CONTROLLER ARM TIMER)
     T4CONbits.TON = 0; // Disable Timer
     T4CONbits.TCS = 0; // Select internal instruction cycle clock
@@ -380,12 +398,14 @@ void InitUART(void)
     U1MODEbits.ABAUD = 1; // Auto-Baud disabled
     U1MODEbits.BRGH = 0; // Standard-Speed mode
     U1BRG = BRGVAL1;//U1BRG;//BRGVAL1; // Baud Rate setting
-    U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is transmitted
+    U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is Received
     U1STAbits.URXISEL1 = 0;
-    
+
+    U1MODEbits.URXINV = 0; // Idle state is 1
     U1MODEbits.UARTEN = 1; // Enable UART
     
     
+    U1STAbits.UTXEN = 1; // Enable UART TX
     IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
     IFS0bits.U1RXIF = 0; //Reset interrupt flag
     

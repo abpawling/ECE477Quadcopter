@@ -34,7 +34,8 @@
 
 /* TODO Fill in your configuration bits from the config bits generator here.  */
 
-// PIC24EP512GU810 Configuration Bit Settings
+
+// PIC24EP512GP806 Configuration Bit Settings
 
 // 'C' source line config statements
 
@@ -46,11 +47,11 @@
 #pragma config GSSK = OFF               // General Segment Key bits (General Segment Write Protection and Code Protection is Disabled)
 
 // FOSCSEL
-#pragma config FNOSC = FRCDIVN          // Initial Oscillator Source Selection bits (Internal Fast RC (FRC) Oscillator with postscaler)
+#pragma config FNOSC = PRI              // Initial Oscillator Source Selection bits (Primary Oscillator (XT, HS, EC))
 #pragma config IESO = ON                // Two-speed Oscillator Start-up Enable bit (Start up device with FRC, then switch to user-selected oscillator source)
 
 // FOSC
-#pragma config POSCMD = NONE            // Primary Oscillator Mode Select bits (Primary Oscillator disabled)
+#pragma config POSCMD = XT              // Primary Oscillator Mode Select bits (XT Crystal Oscillator Mode)
 #pragma config OSCIOFNC = OFF           // OSC2 Pin Function bit (OSC2 is clock output)
 #pragma config IOL1WAY = ON             // Peripheral pin select configuration (Allow only one reconfiguration)
 #pragma config FCKSM = CSDCMD           // Clock Switching Mode bits (Both Clock switching and Fail-safe Clock Monitor are disabled)
@@ -66,9 +67,6 @@
 #pragma config FPWRT = PWR128           // Power-on Reset Timer Value Select bits (128ms)
 #pragma config BOREN = ON               // Brown-out Reset (BOR) Detection Enable bit (BOR is enabled)
 #pragma config ALTI2C1 = OFF            // Alternate I2C pins for I2C1 (SDA1/SCK1 pins are selected as the I/O pins for I2C1)
-//#pragma config ALTI2C2 = OFF            // Alternate I2C pins for I2C2 (SDA2/SCK2 pins are selected as the I/O pins for I2C2)
-
-//TODO: uncomment above ?
 
 // FICD
 #pragma config ICS = PGD1               // ICD Communication Channel Select bits (Communicate on PGEC1 and PGED1)
@@ -79,6 +77,5 @@
 #pragma config AWRP = OFF               // Auxiliary Segment Write-protect bit (Aux Flash may be written)
 #pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
-
 
 
