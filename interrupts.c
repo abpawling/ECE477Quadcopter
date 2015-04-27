@@ -185,12 +185,10 @@ int * getSensorArray()
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
-int h,k,j = 0;
+int h,k,j = 0; //hazardous global vars
 char ReceiveBuff [100];
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
-    //char ReceiveBuff [100]; // = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    //int i,j = 0;
     if (h == 0)
     {
         h = 1;
@@ -200,41 +198,34 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
         }
     }
     
-    //if (IFS0bits.U1RXIF)
-    //{
-                if(U1STAbits.URXDA == 1)
-                {
-                    //if(U1STAbits.FERR != 1)
-                    //{                
-                    
-                    ReceiveBuff[k] = U1RXREG;
-                    /*LCDWriteInstr(CLEAR);
-                    LCDWriteData(ReceiveBuff[0]);
-                    LCDWriteData(ReceiveBuff[1]);
-                    LCDWriteData(ReceiveBuff[2]);
-                    LCDWriteData(ReceiveBuff[3]);
-                    LCDWriteData(ReceiveBuff[4]);
-                    LCDWriteData(ReceiveBuff[5]);
-                    LCDWriteData(ReceiveBuff[6]);
-                    LCDWriteData(ReceiveBuff[7]);*/
-                    k++;
-                    if(k == 100)
-                    {
-
-                        k=0;
-                          
-                    }
-                //}
-
-                 }
-    //}
-    
-   // ReceiveBuff[0] = ReceiveBuff[0];
+    ReceiveBuff[k] = U1RXREG;
+    k++;
+    if(k == 100)
+    {
+        LCDWrite(CLEAR,0,0);
+        LCDWrite(ReceiveBuff[0],1,0);
+        LCDWrite(ReceiveBuff[1],1,0);
+        LCDWrite(ReceiveBuff[2],1,0);
+        LCDWrite(ReceiveBuff[3],1,0);
+        LCDWrite(ReceiveBuff[4],1,0);
+        LCDWrite(ReceiveBuff[5],1,0);
+        LCDWrite(ReceiveBuff[6],1,0);
+        LCDWrite(ReceiveBuff[7],1,0);
+        LCDWrite(LINE2,0,0);
+        LCDWrite(ReceiveBuff[8],1,0);
+        LCDWrite(ReceiveBuff[9],1,0);
+        LCDWrite(ReceiveBuff[10],1,0);
+        LCDWrite(ReceiveBuff[11],1,0);
+        LCDWrite(ReceiveBuff[12],1,0);
+        LCDWrite(ReceiveBuff[13],1,0);
+        LCDWrite(ReceiveBuff[14],1,0);
+        LCDWrite(ReceiveBuff[15],1,0);
+        k=0;                
+    }
     
     
     //U1TXREG = 'a'; // Transmit one character
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
-    
     
 }
 

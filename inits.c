@@ -24,6 +24,15 @@ void InitApp(void)
     
     //Initialize Oscillator?
   
+    //_PLLDIV = 38;
+    //_PLLPRE = 0;
+    //_PLLPOST = 0;
+    
+    //CLKDIVbits.FRCDIV = 1; // 8MHz
+    
+    
+    RPOR6bits.RP87R = 0b110001;
+    REFOCON = 0x8300;
     
     /* Initialize digital pins and I/O direction */
     InitAnalogFunctionality();
@@ -57,8 +66,8 @@ void InitLCD(void)
     LCDWrite(RET_HOME,0,0);
     LCDWrite(CONFIG,0,0);
     LCDWrite(TWOLINE,0,0);
-    printMsgToLCD(testmsg1,LINE1);
-    printMsgToLCD(testmsg2,LINE2);
+    //printMsgToLCD(testmsg1,LINE1);
+    //printMsgToLCD(testmsg2,LINE2);
     
 }
 
@@ -342,25 +351,6 @@ void InitSPI(void)
     IFS0bits.SPI1IF = 0; // Clear the Interrupt flag
     IEC0bits.SPI1IE = 1; // Enable the interrupt
     
-    
-
-    // ---------- SPI2 Initialization Master Mode (LCD SCREEN) ----------
-    IFS2bits.SPI2IF = 0; // Clear the Interrupt flag
-    IEC2bits.SPI2IE = 0; // Disable the interrupt
-    // SPI1CON1 Register Settings
-    SPI2CON1bits.DISSCK = 0; // Internal serial clock is enabled
-    SPI2CON1bits.DISSDO = 0; // SDOx pin is controlled by the module
-    SPI2CON1bits.MODE16 = 1; // Communication is word-wide (16 bits)
-    SPI2CON1bits.MSTEN = 1; // Master mode enabled
-    SPI2CON1bits.SMP = 0; // Input data is sampled at the middle of data output time
-    SPI2CON1bits.CKE = 0; // Serial output data changes on transition from
-    // Idle clock state to active clock state
-    SPI2CON1bits.CKP = 0; // Idle state for clock is a low level;
-    // active state is a high level
-    SPI2STATbits.SPIEN = 1; // Enable SPI module
-    // Interrupt Controller Settings
-    IFS2bits.SPI2IF = 0; // Clear the Interrupt flag
-    
     // Force First Word After Enabling SPI
     DMA0REQbits.FORCE=1;
     while (DMA0REQbits.FORCE == 1);
@@ -386,25 +376,25 @@ void InitUART(void)
 {   
        
     // ---------- UART1 Initialization (Interfaces with GPS) ----------
-    #define FP FCY//4000000//8000000
-    #define BAUDRATE1 9600//38400
-    #define BRGVAL1 ((FP/BAUDRATE1)/16)-1
+    //#define FP FCY//4000000 //FCY //8000000
+    //#define BAUDRATE1 9600 //19200 //9600
+    //#define BRGVAL1 ((FP/BAUDRATE1)/16)-1
     
     RPINR18bits.U1RXR = 0b1010001; //Maps U1RX to RPI81 (pin 61)
     RPOR5bits.RP82R = 0b000001; // Maps U1TX to RP82  (pin 62)
     
     U1MODEbits.STSEL = 0; // 1-Stop bit
     U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
-    U1MODEbits.ABAUD = 1; // Auto-Baud disabled
+    U1MODEbits.ABAUD = 0; // Auto-Baud disabled
     U1MODEbits.BRGH = 0; // Standard-Speed mode
-    U1BRG = BRGVAL1;//U1BRG;//BRGVAL1; // Baud Rate setting
+    U1BRG = 25; //BRGVAL1;//U1BRG; // Baud Rate setting
+    //UxBRGBITS = 25;
     U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is Received
     U1STAbits.URXISEL1 = 0;
 
     U1MODEbits.URXINV = 0; // Idle state is 1
     U1MODEbits.UARTEN = 1; // Enable UART
-    
-    
+   
     U1STAbits.UTXEN = 1; // Enable UART TX
     IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
     IFS0bits.U1RXIF = 0; //Reset interrupt flag
@@ -415,8 +405,8 @@ void InitUART(void)
     //IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
 
     // ---------- UART2 Initialization (Interfaces with Camera) ----------
-    #define BAUDRATE2 9600
-    #define BRGVAL2 ((FP/BAUDRATE2)/16)-1
+    //#define BAUDRATE2 9600
+    //#define BRGVAL2 ((FP/BAUDRATE2)/16)-1
 
     RPINR19bits.U2RXR = 0b0101111; //Maps U2RX to RPI47 (pin 30)
     RPOR9bits.RP100R = 0b1100100; // Maps U2TX to RP100  (pin 31)
@@ -425,7 +415,7 @@ void InitUART(void)
     U2MODEbits.PDSEL = 0; // No Parity, 8-Data bits
     U2MODEbits.ABAUD = 0; // Auto-Baud disabled
     U2MODEbits.BRGH = 0; // Standard-Speed mode
-    U2BRG = BRGVAL2; // Baud Rate setting
+    U2BRG = 25;//BRGVAL2; // Baud Rate setting
     U2STAbits.URXISEL0 = 0; // Interrupt after one RX character is transmitted
     U2STAbits.URXISEL1 = 0;
     U2MODEbits.UARTEN = 1; // Enable UART

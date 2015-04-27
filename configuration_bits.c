@@ -1,6 +1,3 @@
-/******************************************************************************/
-/* Files to Include                                                           */
-/******************************************************************************/
 
 /* Device header file */
 #if defined(__XC16__)
@@ -32,9 +29,6 @@
 /* paste into this project.                                                   */
 /******************************************************************************/
 
-/* TODO Fill in your configuration bits from the config bits generator here.  */
-
-
 // PIC24EP512GP806 Configuration Bit Settings
 
 // 'C' source line config statements
@@ -47,14 +41,14 @@
 #pragma config GSSK = OFF               // General Segment Key bits (General Segment Write Protection and Code Protection is Disabled)
 
 // FOSCSEL
-#pragma config FNOSC = PRI              // Initial Oscillator Source Selection bits (Primary Oscillator (XT, HS, EC))
-#pragma config IESO = ON                // Two-speed Oscillator Start-up Enable bit (Start up device with FRC, then switch to user-selected oscillator source)
+#pragma config FNOSC = PRI //FRCDIV16 //PRI              // Initial Oscillator Source Selection bits (Primary Oscillator (XT, HS, EC))
+#pragma config IESO = OFF               // Two-speed Oscillator Start-up Enable bit (Start up with user-selected oscillator source)
 
 // FOSC
 #pragma config POSCMD = XT              // Primary Oscillator Mode Select bits (XT Crystal Oscillator Mode)
 #pragma config OSCIOFNC = OFF           // OSC2 Pin Function bit (OSC2 is clock output)
 #pragma config IOL1WAY = ON             // Peripheral pin select configuration (Allow only one reconfiguration)
-#pragma config FCKSM = CSDCMD           // Clock Switching Mode bits (Both Clock switching and Fail-safe Clock Monitor are disabled)
+#pragma config FCKSM = CSECMD           // Clock Switching Mode bits (Both Clock switching and Fail-safe Clock Monitor are disabled)
 
 // FWDT
 #pragma config WDTPOST = PS32768        // Watchdog Timer Postscaler bits (1:32,768)
@@ -77,5 +71,3 @@
 #pragma config AWRP = OFF               // Auxiliary Segment Write-protect bit (Aux Flash may be written)
 #pragma config APL = OFF                // Auxiliary Segment Code-protect bit (Aux Flash Code protect is disabled)
 #pragma config APLK = OFF               // Auxiliary Segment Key bits (Aux Flash Write Protection and Code Protection is Disabled)
-
-
