@@ -21,11 +21,14 @@
 
 
 #include "user.h"            /* variables/params used by user.c */
-#include "LinkedList.h"
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 
 #include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
+
+#define COLLISION_COUNT 20
+gpsUpdate collisions [COLLISION_COUNT];
+int collisionIndex = 0;
 
 /******************************************************************************
  * 
@@ -43,22 +46,12 @@ void Arm()
  * Keeps track of objects in flight path
  * 
  ******************************************************************************/
-waypoint * InitCollisionList(int coord)
+gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
 {
-    /*
-    //declarations
-    waypoint *head = NULL;
-    waypoint *current;
-    int i;
+    collisions[collisionIndex] = currGPS;
+    collisionIndex++;
+    return collisions;
 
-    #define COLLISION_COUNT 20
-    static waypoint collisions [COLLISION_COUNT];
-
-    //get current GPS waypoint
-    //data = getCurrPos();
-
-     */
-    
 }
 
 /******************************************************************************
@@ -66,31 +59,157 @@ waypoint * InitCollisionList(int coord)
  * Controls quadcopter
  * 
  ******************************************************************************/
- bool Navigate(int finalDest, int* sensorArray)
+ bool Navigate(gpsUpdate GPSFinal, int* sensorArray, gpsUpdate currentGPS)
 {
-     //char orientation;
-     
-    bool frontFlag = 0;
-    bool backFlag = 0;
-    bool leftFlag = 0;
-    bool rightFlag = 0;
-    bool downFlag = 0;
     
-    if (sensorArray[0] >= 25) {frontFlag = 1;} //FRONT Sensor value
-    if (sensorArray[1] >= 25) {backFlag = 1;} //BACK Sensor value
-    if (sensorArray[2] >= 25) {leftFlag = 1;} //LEFT Sensor value
-    if (sensorArray[3] >= 25) {rightFlag = 1;} //RIGHT Sensor value
-    if (sensorArray[4] >= 25) {downFlag = 1;} //DOWN Sensor value*/
+    //face GPSFinal location
+    orientQuad(currentGPS,GPSFinal);
     
-    //turn and "face" destination
-    //head straight to the destination
+    flyToFinalDest(currentGPS,GPSFinal,sensorArray);
+ }
+ 
+ bool flyToFinalDest(gpsUpdate currGPS, gpsUpdate finalGPS, int * sensorArray)
+ {
+    #define DETECTION_CUTOFF 25 
+    bool frontFlag,backFlag,leftFlag,rightFlag,downFlag,objectDetected = 0;
     
-    //avoid obstacles
-    
-     /*if (orientation == "N" && finalDest.orientation != "N")
-     {
-        //rotate until facing orientation
+    while (currGPS.latitude != finalGPS.latitude && currGPS.longitude != finalGPS.longitude) //TODO: add error tolerance
+    {
+        currGPS = getGPS();
+        if (sensorArray[0] >= DETECTION_CUTOFF) {frontFlag = 1;} //FRONT Sensor value
+        if (sensorArray[1] >= DETECTION_CUTOFF) {backFlag = 1;} //BACK Sensor value
+        if (sensorArray[2] >= DETECTION_CUTOFF) {leftFlag = 1;} //LEFT Sensor value
+        if (sensorArray[3] >= DETECTION_CUTOFF) {rightFlag = 1;} //RIGHT Sensor value
+        if (sensorArray[4] >= DETECTION_CUTOFF) {downFlag = 1;} //DOWN Sensor value
 
-     }*/    
+        if (frontFlag || backFlag || leftFlag || rightFlag)
+        {
+            objectDetected = 1;
+            //pause navigation for testing
+            //collisions = addToCollisionArray(currGPS);
+        }
+
+        //TODO: Finish
+        if (frontFlag) // && currGPS.latitude < finalGPS.latitude) // && 
+        {
+            if (currGPS.longitude < finalGPS.longitude)
+            {
+                //go east
+            }
+            else
+            {
+                //go west
+            }
+        }
+        
+        //?
+        if (backFlag) // && currGPS.latitude < finalGPS.latitude) // && 
+        {
+            if (currGPS.longitude < finalGPS.longitude)
+            {
+                //go east
+            }
+            else
+            {
+                //go west
+            }
+        }
+        
+        if (leftFlag)
+        {
+            if (currGPS.latitude < finalGPS.latitude)
+            {
+                //go north
+            }
+            else
+            {
+                //go south
+            }
+        }
+        
+        if (rightFlag)
+        {
+            if (currGPS.latitude < finalGPS.latitude)
+            {
+                //go north
+            }
+            else
+            {
+                //go south
+            }
+        }
+        
+        
+    
+    }
+    
+    
+ }
+ 
+ void orientQuad(gpsUpdate currentGPS, gpsUpdate GPSFinal)
+ {
+     //TODO: add error tolerance
+     if (currentGPS.longitude < GPSFinal.longitude)
+    {
+        //east
+        while (currentGPS.eastWest != 'E')
+        {
+            //spin east
+        }
+        
+    }
+    
+    if (currentGPS.longitude > GPSFinal.longitude)
+    {
+        //east
+        while (currentGPS.eastWest != 'W')
+        {
+            //spin west
+        }
+        
+    }
+    
+    if (currentGPS.latitude < GPSFinal.latitude)
+    {
+        //east
+        while (currentGPS.northSouth != 'N')
+        {
+            //spin north
+        }
+        
+    }
+    
+    if (currentGPS.latitude > GPSFinal.latitude)
+    {
+        //east
+        while (currentGPS.northSouth != 'S')
+        {
+            //spin south
+        }
+        
+    }
+ }
+ 
+ gpsUpdate grabGPSFinal()
+ {
+     gpsUpdate final;
+     
+     //final.latitude = ;
+     //final.longitude = ;
+     
+     /*final.altitude = ;
+     final.eastWest = ;
+     final.northSouth = ;*/
+     return final;
+ }
+ 
+ bool survey(void)
+ {
+     int done = 0;
+     
+     //survey
+     done = 1;
+     
+     return done;
  }
  

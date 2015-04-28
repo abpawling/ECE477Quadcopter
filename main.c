@@ -17,12 +17,12 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
-#include <stdio.h>
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
 #include "inits.h"
 #include "utils.h"
+#include "string.h"
 #include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
 
@@ -46,13 +46,19 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     
-    int push = 1; //TODO set up pushbutton
+    int push = 1; //TODO: set up pushbutton
     int * sensorArray;
-    int finalDest = 5;
-    bool atDestination;
+    bool atDestination,surveyed,landed = 0;
     int heartbeatCount = 0;
+    gpsUpdate gpsCurr;
+    gpsUpdate gpsFinalDest;
+    gpsUpdate initialGPS;
+    initialGPS = gpsCurr;
+    char * quadcopterState = "Idle";
     
-    if (push) //Pushbutton
+    gpsFinalDest = grabGPSFinal();
+    
+    if (push && strcmp(quadcopterState,"Idle")) //Pushbutton
     {
         Arm();
         IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
@@ -61,16 +67,61 @@ int16_t main(void)
         push = 0;
     }
     
+    sensorArray = getSensorArray();
     
-    while(1)
+    //LEDs
+    //PORTBbits.RB12 = 1; //yellow heartbeat LED
+    //PORTBbits.RB13 = 1; //green LED
+    //PORTBbits.RB14 = 1; //green LED
+    //PORTFbits.RF5 = 1; //doesn't work
+    
+    //TODO: set up battery monitoring
+    
+    //takeoff
+    while (sensorArray[4] < 100) //TODO: test for cutoff value
+    {
+        quadcopterState = "Takeoff";
+        //increase altitude
+    }
+    
+    quadcopterState = "Navigate";
+    
+    //while(1)
+    while (!strcmp(quadcopterState,"MissionComplete"))
     {    
         
-        sensorArray = getSensorArray();
-        atDestination = Navigate(finalDest,sensorArray); //change flight path using sensor data
         
-        char ReceivedChar [100];
-        int a,i = 0;
-        //char Temp;
+        gpsCurr = getGPS();
+        atDestination = Navigate(gpsFinalDest,sensorArray,gpsCurr); //change flight path using sensor data
+        
+        //Survey
+        if (atDestination && !strcmp(quadcopterState,"FlyBack"))
+        {
+            PORTBbits.RB13 = 1; //green LED
+            quadcopterState = "Survey";
+            surveyed = survey();
+        }
+        
+        //Return Home
+        if (surveyed)
+        {
+            quadcopterState = "FlyBack";
+            atDestination = Navigate(initialGPS,sensorArray,gpsCurr);
+        }
+        
+        //Land
+        if (atDestination && strcmp(quadcopterState,"FlyBack"))
+        {
+            quadcopterState = "Landing";
+            //TODO: add land function
+            //landed = land();
+            
+        }
+        
+        if (landed)
+        {
+            quadcopterState = "MissionComplete";
+        }
         
         if (heartbeatCount >= 8000)
         {
@@ -78,7 +129,7 @@ int16_t main(void)
             if (heartbeatCount >= 10000)
             {
                 heartbeatCount = 0;
-                U1TXREG = 0b01010101;
+                //U1TXREG = 0b01010101; //for testing
             }
         }
         else
@@ -87,35 +138,24 @@ int16_t main(void)
         }
         heartbeatCount++;
         
-        //PORTBbits.RB12 = 1; //yellow heartbeat LED
-        //PORTBbits.RB13 = 1; //green LED
-        //PORTBbits.RB14 = 1; //green LED
-        //PORTFbits.RF5 = 1; //doesn't work
-        
-        /* Check for receive errors */
+        /*
+        // Check for receive errors
         if(U1STAbits.FERR == 1)
         {
-            a = 2;
             continue;
         }
         // Must clear the overrun error to keep UART receiving 
         if(U1STAbits.OERR == 1)
         {
-            
             U1STAbits.OERR = 0;
             continue;
         }
-        
-        /*while(IFS0bits.U1RXIF == 0){
-            Temp = U1RXREG;
-            IFS0bits.U1RXIF = 1;
-        }*/
-        // Get the data
-        if(U1STAbits.URXDA == 1)
-        {
-            a = 1;
-        }
-        
+        */
     }
+    
+    /*while (strcmp(quadcopterState,"Survey"))
+    {
+        //take pictures and store to SD card
+    }*/
     
 }

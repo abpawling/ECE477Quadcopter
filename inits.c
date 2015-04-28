@@ -56,8 +56,8 @@ void InitLCD(void)
     #define RET_HOME 0x002
     #define CONFIG 0b0000001111 //Display ON, cursor ON, blink ON
 
-    char * testmsg1 = "123456789abcdefghijklmnopqrstuvwxyz";
-    char * testmsg2 = "are cool!";
+    //char * testmsg1 = "123456789abcdefghijklmnopqrstuvwxyz";
+    //char * testmsg2 = "are cool!";
     
     LATDbits.LATD5 =  0; //Contrast
     PMD3bits.RTCCMD = 1; //High disables RTCC module on port RD8    
@@ -375,11 +375,7 @@ void InitSPI(void)
 void InitUART(void)
 {   
        
-    // ---------- UART1 Initialization (Interfaces with GPS) ----------
-    //#define FP FCY//4000000 //FCY //8000000
-    //#define BAUDRATE1 9600 //19200 //9600
-    //#define BRGVAL1 ((FP/BAUDRATE1)/16)-1
-    
+    // ---------- UART1 Initialization (Interfaces with GPS) ----------    
     RPINR18bits.U1RXR = 0b1010001; //Maps U1RX to RPI81 (pin 61)
     RPOR5bits.RP82R = 0b000001; // Maps U1TX to RP82  (pin 62)
     
@@ -387,8 +383,7 @@ void InitUART(void)
     U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
     U1MODEbits.ABAUD = 0; // Auto-Baud disabled
     U1MODEbits.BRGH = 0; // Standard-Speed mode
-    U1BRG = 25; //BRGVAL1;//U1BRG; // Baud Rate setting
-    //UxBRGBITS = 25;
+    U1BRG = 25; //BRGVAL1; // Baud Rate setting
     U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is Received
     U1STAbits.URXISEL1 = 0;
 
@@ -398,15 +393,8 @@ void InitUART(void)
     U1STAbits.UTXEN = 1; // Enable UART TX
     IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
     IFS0bits.U1RXIF = 0; //Reset interrupt flag
-    
-    
-    //U1STAbits.URXEN = 1; // Enable UART RX ???
-    //U1STAbits.UTXEN = 1; // Enable UART TX
-    //IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
 
     // ---------- UART2 Initialization (Interfaces with Camera) ----------
-    //#define BAUDRATE2 9600
-    //#define BRGVAL2 ((FP/BAUDRATE2)/16)-1
 
     RPINR19bits.U2RXR = 0b0101111; //Maps U2RX to RPI47 (pin 30)
     RPOR9bits.RP100R = 0b1100100; // Maps U2TX to RP100  (pin 31)
