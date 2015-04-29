@@ -25,13 +25,16 @@
 //#include "p24EP512GU810.h"                                                          */
 
 #define SENSOR_AMOUNT 6
-#define CLEAR 0x001
 
 int armCount = 0; //global var to get proper ARM timing of flight controller
 
 // Positions                       F,B,L,R,D,count
 int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0,0};
 gpsUpdate gp;
+
+/******************************************************************************/
+/* Get/Set Routines                                                         */
+/******************************************************************************/
 
 int * getSensorArray()
 {
@@ -51,8 +54,6 @@ void setGPS(gpsUpdate g)
 /******************************************************************************/
 /* Interrupt Routines                                                         */
 /******************************************************************************/
-
-
 
 /******************************************************************************
  * 
@@ -116,7 +117,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     
     if(k == 100)
     {
-        LCDWrite(CLEAR,0,0);
+        //LCDWrite(CLEAR,0,0);
         /*for (write = 0;write <= 7;write++)
         {
             LCDWrite(ReceiveBuff[write],1,0);
@@ -127,7 +128,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
             LCDWrite(ReceiveBuff[write],1,0);
         }*/
         
-        printMsgToLCD(ReceiveBuff,LINE1); //add shift and this should work
+        //printMsgToLCD(ReceiveBuff,LINE1); //add shift and this should work
         
         k=0;                
     }
@@ -148,7 +149,7 @@ bool triggerDown = 0;
 void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
 {    
     if (c == 10 ){
-        PORTBbits.RB0 = 0; //Active low configuration -- assert trigger
+        PORTBbits.RB0 = 1;//0; //Active low configuration -- assert trigger
         c = 0;
         triggerDown = 1;
         //T3CONbits.TON = 1; // Start Timer3
@@ -166,7 +167,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
             triggerDown = 0;
         }
         //T3CONbits.TON = 1; // Start Timer3
-        PORTBbits.RB0 = 1; //Active low configuration
+        PORTBbits.RB0 = 0;//1; //Active low configuration
         c++;        
         
     }
@@ -183,6 +184,12 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
     //interrupt counter
     sensorArray[5]++;
     
+    //LCDWrite(CLEAR,0,0);
+    /*LCDWrite("A",1,0);
+    LCDWrite("B",1,0);
+    LCDWrite("C",1,0);*/
+    //printMsgToLCD(sensorArray[0],LINE1);
+    //printMsgToLCD("HERE",LINE1);
     //----- Object Detection -----
     if (PORTBbits.RB1)
     {
@@ -194,26 +201,26 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
         sensorArray[1]++; //Back Sensor
     }
     
-    if (!PORTBbits.RB3) //INVERTED
+    if (PORTBbits.RB3) //NOT INVERTED
     {
         sensorArray[2]++; //Left Sensor
     }
     
-    if (!PORTBbits.RB4) //INTERRUPT NEEDS CONFIGURED
+    if (PORTBbits.RB4) //TODO: INTERRUPT NEEDS CONFIGURED
     {
         sensorArray[3]++; //Right Sensor
     }
     
-    if (PORTBbits.RB5) //INTERRUPT NEEDS CONFIGURED
+    if (PORTBbits.RB5) //TODO: INTERRUPT NEEDS CONFIGURED
     {
         sensorArray[4]++; //Down Sensor
     }
     
-    if (sensorArray[5] == 50) //30
+    if (sensorArray[5] == 100) //30
     {
         T3CONbits.TON = 0; // Stop Timer3
         sensorArray[5] = 0;
-        sensorArray[3] = 0; //reset count
+        sensorArray[0] = 0; //reset count
     }
     
     IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
@@ -230,7 +237,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
     if (armCount >= 4)
     {
         OC4R = 5500; //YAW To neutral 
-        OC3R = 5000; //THROTTLE
+        OC3R = 4800; //THROTTLE
 
         //IEC1bits.T4IE = 1; // Enable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4

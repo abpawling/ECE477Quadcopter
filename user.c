@@ -17,16 +17,11 @@
 
 #include <stdint.h>          /* For uint32_t definition */
 #include <stdbool.h>         /* For true/false definition */
-#include <stdlib.h>
-
-
 #include "user.h"            /* variables/params used by user.c */
-#include "system.h"        /* System funct/params, like osc/peripheral config */
 
 #include "p24EP512GP806.h"
-//#include "p24EP512GU810.h"
+//#include "p24EP512GU810.h" //for using dev board
 
-#define COLLISION_COUNT 20
 gpsUpdate collisions [COLLISION_COUNT];
 int collisionIndex = 0;
 
@@ -37,8 +32,9 @@ int collisionIndex = 0;
  ******************************************************************************/
 void Arm()
 {
-    OC4R = 7000; //YAW
-    OC3R = 4000; //7000; //THROTTLE
+    OC3R = 4400; //THROTTLE //pin55
+    OC4R = 7000; //YAW //pin58
+    
 }
 
 /******************************************************************************
@@ -61,19 +57,21 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  ******************************************************************************/
  bool Navigate(gpsUpdate GPSFinal, int* sensorArray, gpsUpdate currentGPS)
 {
-    
+     bool atDest = 0;
+     
     //face GPSFinal location
     orientQuad(currentGPS,GPSFinal);
     
-    flyToFinalDest(currentGPS,GPSFinal,sensorArray);
+    atDest = flyToFinalDest(currentGPS,GPSFinal,sensorArray);
+    
+    return atDest;
  }
  
  bool flyToFinalDest(gpsUpdate currGPS, gpsUpdate finalGPS, int * sensorArray)
  {
-    #define DETECTION_CUTOFF 25 
     bool frontFlag,backFlag,leftFlag,rightFlag,downFlag,objectDetected = 0;
     
-    while (currGPS.latitude != finalGPS.latitude && currGPS.longitude != finalGPS.longitude) //TODO: add error tolerance
+    if (currGPS.latitude != finalGPS.latitude && currGPS.longitude != finalGPS.longitude) //TODO: add error tolerance
     {
         currGPS = getGPS();
         if (sensorArray[0] >= DETECTION_CUTOFF) {frontFlag = 1;} //FRONT Sensor value
@@ -138,9 +136,11 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
                 //go south
             }
         }
-        
-        
-    
+        return 0;
+    }
+    else 
+    {
+        return 1;
     }
     
     
@@ -211,5 +211,28 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
      done = 1;
      
      return done;
+ }
+ 
+ int heartBeat(int beatCount)
+ {
+     if (beatCount >= 8000)
+        {
+            PORTBbits.RB12 = 1; //yellow heartbeat LED
+            //printMsgToLCD(test,LINE1);
+            if (beatCount >= 100000)
+            {
+                //LCDWrite(CLEAR,0,0);
+                //printMsgToLCD(test,LINE1);
+                //printMsgToLCD(sensorArray[0],LINE1);
+                beatCount = 0;
+                //U1TXREG = 0b01010101; //for testing
+            }
+        }
+        else
+        {
+            PORTBbits.RB12 = 0; //yellow heartbeat LED
+        }
+        beatCount++;
+        return beatCount;
  }
  

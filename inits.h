@@ -11,6 +11,6 @@ void InitSPI(void);        /*SPI*/
 void InitPWM(void);        /*PWM*/
 void InitTimers(void);     /*Timers*/
 void InitAnalogFunctionality(void); /*Set functionality for analog/digital pins*/
-void InitIO(void); /*Set direction of pins*/
-void InitLCD(void); /*Get LCD ready for data*/
+void InitIO(void);                  /*Set direction of pins*/
+void InitLCD(void);                 /*Get LCD ready for data*/
 
