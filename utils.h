@@ -28,6 +28,9 @@
 //OTHER
 #define DETECTION_CUTOFF 25
 #define COLLISION_COUNT 20
+#define SENSOR_COUNT_AMOUNT 6
+#define GPS_LENGTH 100
+#define CAM_DATA_AMOUNT 100
 
 //---------- Functions ----------
 

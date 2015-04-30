@@ -294,14 +294,14 @@ void InitTimers(void)
 void InitPWM(void)
 {
     
-    //PWMs: 5500 = neutral
+    //PWMs: 6000 = neutral
     
     // ---------- PWM1 Initialization (ROLL) ----------
     RPOR7bits.RP97R = 0b010000; //Maps Output Compare 1 to output pin RP97 (pin 59)    
     OC1CON1 = 0;
     OC1CON2 = 0;
     OC1CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC1R = 5500; // ROLL
+    OC1R = 6000; // ROLL
     OC1RS = 8000; // Determines the Period
     OC1CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC1CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
@@ -311,7 +311,7 @@ void InitPWM(void)
     OC2CON1 = 0; 
     OC2CON2 = 0;
     OC2CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC2R = 5500; // PITCH
+    OC2R = 6000; // PITCH
     OC2RS = 8000; // Determines the Period
     OC2CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC2CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
@@ -326,12 +326,12 @@ void InitPWM(void)
     OC3CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC3CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode
     
-    // ---------- PWM4 Initilization (YAW) ----------
+    // ---------- PWM4 Initialization (YAW) ----------
     RPOR7bits.RP96R = 0b010011; //Maps Output Compare 4 to output pin RP96 (pin 58)
     OC4CON1 = 0; 
     OC4CON2 = 0;
     OC4CON1bits.OCTSEL = 0; // This selects the peripheral clock as the clock input to the OC module
-    OC4R = 5500; // YAW 
+    OC4R = 6000; // YAW 
     OC4RS = 8000; // Determines the Period
     OC4CON2bits.SYNCSEL = 0x1F; // This selects the synchronization source as itself
     OC4CON1bits.OCM = 6; // This selects and starts the Edge Aligned PWM mode

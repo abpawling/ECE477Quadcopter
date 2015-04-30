@@ -33,8 +33,56 @@ int collisionIndex = 0;
 void Arm()
 {
     OC3R = 4400; //THROTTLE //pin55
-    OC4R = 7000; //YAW //pin58
+    OC4R = 7600; //YAW //pin58
+}
+
+/******************************************************************************
+ * 
+ * Checks pushbutton: press once for go, press again to kill throttle
+ * 
+ ******************************************************************************/
+int push = 1;
+int armed = 0;
+int prevPush = 0;
+int disarmCount = 0;
+void checkGo()
+{
+    push = PORTGbits.RG9;
+    prevPush = push;
+    LATBbits.LATB13 = !push; //green LED
+    LATBbits.LATB14 = !push; //green LED
+
+    // push = 1: open, push = 0: closed
+    if (!push && !armed) //arm flight controller
+    {
+        prevPush++;
+        armed = 1;
+        Arm();
+        IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
+        IEC1bits.T4IE = 1; // Enable Timer4 interrupt
+        T4CONbits.TON = 1; // Start Timer4    
+    }
     
+    if (armed && disarmCount < 20)
+    {
+        disarmCount++;
+    }
+    
+    if (prevPush == 0 && push == 1) 
+    {
+        push = 0;
+        prevPush = 1;
+    }
+    
+    if (!push) 
+    {
+        prevPush = 0; 
+    }
+    
+    if (!push && armed && disarmCount >= 20) //kill throttle
+    {
+        OC3R = 4400; //THROTTLE
+    }    
 }
 
 /******************************************************************************
@@ -235,4 +283,19 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
         beatCount++;
         return beatCount;
  }
+ 
+ bool InitSD(void)
+ {
+     return 1;
+ }
+ 
+bool WriteSD(char* camData)
+{
+    return 1;
+}
+
+bool ReadSD(void)
+{
+    return 1;
+}
  

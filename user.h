@@ -2,8 +2,8 @@
 
 //STARTUP
 int heartBeat(int); /*Blinks heartbeat LED*/
-gpsUpdate grabGPSFinal(); /*Retrieves GPS data from SD card*/
 void Arm(void); /*Arm Flight Controller*/
+void checkGo(void);
 
 //NAV
 bool Navigate(gpsUpdate gpsFinalDest, int* sensorArray,gpsUpdate); /*Top-Level GPS Waypoint navigation function*/
@@ -13,6 +13,12 @@ gpsUpdate* addToCollisionArray(gpsUpdate); /*Add collisions to array - keeps tra
 
 //SURVEY
 bool survey(void); /*Takes photos at surevey location*/
+
+//SD
+bool InitSD(void);
+gpsUpdate grabGPSFinal(); /*Retrieves GPS data from SD card*/
+bool WriteSD(char*);
+bool ReadSD(void);
 
 //GET/SET
 int* getSensorArray(); /*Used to update sensor data*/

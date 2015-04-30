@@ -24,12 +24,10 @@
 #include <string.h>
 //#include "p24EP512GU810.h"                                                          */
 
-#define SENSOR_AMOUNT 6
-
 int armCount = 0; //global var to get proper ARM timing of flight controller
 
 // Positions                       F,B,L,R,D,count
-int sensorArray [SENSOR_AMOUNT] = {0,0,0,0,0,0};
+int sensorArray [SENSOR_COUNT_AMOUNT] = {0,0,0,0,0,0};
 gpsUpdate gp;
 
 /******************************************************************************/
@@ -60,8 +58,8 @@ void setGPS(gpsUpdate g)
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
-int h,k,j,commaCount,latIndex,longIndex,write = 0; //hazardous global vars
-char ReceiveBuff [100];
+int h,k,j,commaCount,latIndex,longIndex,write = 0; //hazardous global vars for interrupts
+char ReceiveBuff [GPS_LENGTH];
 char Lat [9];
 char Long [9];
 char Altitude [6];
@@ -130,7 +128,7 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
         
         //printMsgToLCD(ReceiveBuff,LINE1); //add shift and this should work
         
-        k=0;                
+        k = 0;                
     }
     
     
@@ -138,6 +136,25 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     
 }
+
+/******************************************************************************
+ * 
+ * UART2 ISR - U2RX INTERRUPT
+ * 
+ ******************************************************************************/
+char cameraData [CAM_DATA_AMOUNT];
+int cam = 0;
+/*void __attribute__((__interrupt__)) _U2RXInterrupt(void)
+{
+ cameraData[cam] = U2RXREG;
+ 
+ if (cam == 100)
+ {
+    //write to SD via SPI - done through SPI Interrupt
+    // SPI interrupt flag = 1
+    cam = 0;
+ }
+}*/
 
 /******************************************************************************
  * 
@@ -196,10 +213,10 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
         sensorArray[0]++; //Front Sensor
     }
     
-    if (PORTBbits.RB2)
+    /*if (PORTBbits.RB2)
     {
         sensorArray[1]++; //Back Sensor
-    }
+    }*/
     
     if (PORTBbits.RB3) //NOT INVERTED
     {
@@ -234,12 +251,21 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
 {
     
-    if (armCount >= 4)
+    if (armCount == 4)
     {
-        OC4R = 5500; //YAW To neutral 
+        OC4R = 6000; //YAW To neutral 
         OC3R = 4800; //THROTTLE
 
-        //IEC1bits.T4IE = 1; // Enable Timer4 interrupt
+        //IEC1bits.T4IE = 0; // Disable Timer4 interrupt
+        //T4CONbits.TON = 0; // Stop Timer4
+        
+    }
+    
+    if (armCount == 10) //kill throttle
+    {
+        OC3R = 4400; //THROTTLE
+
+        IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
         
     }
