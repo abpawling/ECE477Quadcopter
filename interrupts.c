@@ -16,28 +16,34 @@
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition */
-#include <stdbool.h>
 
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "utils.h"
 #include "p24EP512GP806.h"
 #include <string.h>
-//#include "p24EP512GU810.h"                                                          */
+//#include "p24EP512GU810.h"
 
 int armCount = 0; //global var to get proper ARM timing of flight controller
 
-// Positions                       F,B,L,R,D,count
+// Positions                             F,B,L,R,D,count
 int sensorArray [SENSOR_COUNT_AMOUNT] = {0,0,0,0,0,0};
+int sensorArrayFinal [SENSOR_COUNT_AMOUNT] = {30,30,30,30,30,0};
+//int * sensorArray;
 gpsUpdate gp;
 
 /******************************************************************************/
 /* Get/Set Routines                                                         */
 /******************************************************************************/
 
-int * getSensorArray()
+int getSensorArrayVal(int index)
 {
-    return sensorArray; 
+    return sensorArrayFinal[index]; 
 }
+
+/*void setSensorArray(int * sa)
+{
+    sensorArray = sa;
+}*/
 
 gpsUpdate getGPS()
 {
@@ -58,7 +64,14 @@ void setGPS(gpsUpdate g)
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
-int h,k,j,commaCount,latIndex,longIndex,write = 0; //hazardous global vars for interrupts
+//hazardous global vars for interrupts
+int h = 0;
+int k = 0;
+int j = 0;
+int commaCount = 0;
+int latIndex = 0;
+int longIndex = 0;
+int write = 0;
 char ReceiveBuff [GPS_LENGTH];
 char Lat [9];
 char Long [9];
@@ -115,8 +128,11 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     
     if(k == 100)
     {
-        //LCDWrite(CLEAR,0,0);
-        /*for (write = 0;write <= 7;write++)
+        
+        
+        /*LCDWrite(CLEAR,0,0);
+         //printMsgToLCD(ReceiveBuff, LINE1);
+        for (write = 0;write <= 7;write++)
         {
             LCDWrite(ReceiveBuff[write],1,0);
         }
@@ -126,7 +142,24 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
             LCDWrite(ReceiveBuff[write],1,0);
         }*/
         
-        //printMsgToLCD(ReceiveBuff,LINE1); //add shift and this should work
+        
+        // ----------  TESTING  ----------
+        /*
+        double latitude;
+        double longitude;
+        double altitude;
+        char eastWest;
+        char northSouth;
+         */
+        
+        /*
+        printMsgToLCD("LAT: ", LINE1);
+        printMsgToLCD(Lat, LINE1);
+        printMsgToLCD("LONG: ", LINE2);
+        printMsgToLCD(Long, LINE2);
+         */
+        
+        // ----------  END TESTING  ----------
         
         k = 0;                
     }
@@ -162,7 +195,7 @@ int cam = 0;
  * 
  ******************************************************************************/
 int c = 0;
-bool triggerDown = 0;
+int triggerDown = 0;
 void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
 {    
     if (c == 10 ){
@@ -170,12 +203,6 @@ void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
         c = 0;
         triggerDown = 1;
         //T3CONbits.TON = 1; // Start Timer3
-        //sensorArray[0] = 0;
-        //sensorArray[1] = 0;
-        //sensorArray[2] = 0;
-        //sensorArray[3] = 0;
-        //sensorArray[4] = 0;
-        //sensorArray[5] = 0;
     }
     else{
         if (triggerDown)
@@ -198,47 +225,49 @@ void __attribute__((__interrupt__, no_auto_psv)) _T5Interrupt(void)
  ******************************************************************************/
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {    
+    int i = 0;
     //interrupt counter
     sensorArray[5]++;
     
-    //LCDWrite(CLEAR,0,0);
-    /*LCDWrite("A",1,0);
-    LCDWrite("B",1,0);
-    LCDWrite("C",1,0);*/
-    //printMsgToLCD(sensorArray[0],LINE1);
-    //printMsgToLCD("HERE",LINE1);
     //----- Object Detection -----
     if (PORTBbits.RB1)
     {
         sensorArray[0]++; //Front Sensor
     }
     
+    //Back Sensor not used
     /*if (PORTBbits.RB2)
     {
         sensorArray[1]++; //Back Sensor
     }*/
     
-    if (PORTBbits.RB3) //NOT INVERTED
+    if (PORTBbits.RB3)
     {
         sensorArray[2]++; //Left Sensor
     }
     
-    if (PORTBbits.RB4) //TODO: INTERRUPT NEEDS CONFIGURED
+    if (PORTBbits.RB4) //TODO: INTERRUPT NEEDS CONFIGURED?
     {
         sensorArray[3]++; //Right Sensor
     }
     
-    if (PORTBbits.RB5) //TODO: INTERRUPT NEEDS CONFIGURED
+    if (PORTBbits.RB5) //TODO: INTERRUPT NEEDS CONFIGURED?
     {
         sensorArray[4]++; //Down Sensor
     }
     
-    if (sensorArray[5] == 100) //30
+    if (sensorArray[5] == 30) //100
     {
         T3CONbits.TON = 0; // Stop Timer3
-        sensorArray[5] = 0;
-        sensorArray[0] = 0; //reset count
-    }
+        for(i = 0; i <= 5; i++)
+        {
+            sensorArrayFinal[i] = sensorArray[i];
+        }
+        for(i = 0; i <= 5; i++)
+        {
+            sensorArray[i] = 0;
+        }
+    } 
     
     IFS0bits.T3IF = 0; //Clear Timer3 interrupt flag
 }
@@ -251,10 +280,13 @@ void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
 {
     
+    
     if (armCount == 4)
     {
+        //LCDWrite(LINE2,0,0);
+        //printMsgToLCD("SPINNING",LINE2); 
         OC4R = 6000; //YAW To neutral 
-        OC3R = 4800; //THROTTLE
+        OC3R = 5000; //THROTTLE
 
         //IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         //T4CONbits.TON = 0; // Stop Timer4
@@ -264,7 +296,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
     if (armCount == 10) //kill throttle
     {
         OC3R = 4400; //THROTTLE
-
+        //ARMFLAG = 0;
         IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
         

@@ -17,7 +17,6 @@
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
-#include <stdbool.h>       /* Includes true/false definition                  */
 
 //#include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
@@ -42,15 +41,25 @@ int16_t main(void)
 {
     /* Declarations */
     
-    int * sensorArray;
-    bool atDestination,surveyed,landed = 0;
+    // Positions            F,B,L,R,D,count
+    //int * sensorArray;// = {0,0,0,0,0,0};
+    int sensorArray [SENSOR_COUNT_AMOUNT]= {30,30,30,30,30,0};
+    int batteryLowFlag = 0;
+    int goFlag = 0;
+    int atDestinationFlag = 0;
+    int takeoffDoneFlag = 0;
+    int surveyDoneFlag = 0;
+    int landDoneFlag = 0;
+    int atHQFlag = 0;
+    int prevBattLowFlag = 0;
+    int interruptError = 0;
     int heartbeatCount = 0;
     gpsUpdate gpsCurr;
     gpsUpdate gpsFinalDest;
     gpsUpdate initialGPS;
     initialGPS = gpsCurr;
-    char * quadcopterState = "Idle";
-    char test [7] = "ABCDEFG";
+    int i = 0;
+    int ARMFLAG = 0;
     
     /* Configure the oscillator for the device */
     ConfigureOscillator();
@@ -58,89 +67,94 @@ int16_t main(void)
     /* Initialize IO ports and peripherals */
     InitApp();
     
-    //gpsFinalDest = grabGPSFinal();
-    //push = LATGbits.LATG9;
-
-    
-    //sensorArray = getSensorArray();
-    
     //Testing PWMs
     //OC1R = 4000; //ROLL (pin59 on micro) (pin6 on breakout) (CH1/RC1 on Flight Controller)
     //OC2R = 4000; //PITCH (pin54 on micro) (pin3 on breakout) (CH2/RC2 on Flight Controller)
     //OC3R = 4000; //THROTTLE (pin55 on micro) (pin4 on breakout) (CH3/RC3 on Flight Controller)
     //OC4R = 4000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
     
-    //TODO: set up battery monitoring
-    
-    //quadcopterState = "Navigate";
+    //get GPS location from SD Card
+    //gpsFinalDest = grabGPSFinal();
     
     while(1)
-    //while (!strcmp(quadcopterState,"MissionComplete"))
-    {        
-        heartbeatCount = heartBeat(heartbeatCount); //know if drone is alive
-        
-        // ----- Flow of things -----
-        checkGo(); //press once for go, press again to kill throttle
-        //checkUART();
-        //Takeoff();
-        //Nav();
-        //Survey();
-        //Land();
-        
-        //takeoff
-        /*while (sensorArray[4] < 100) //TODO: test for cutoff value
+    {           
+        interruptError = checkInterruptErrors(); //TODO: check if needed
+        if (interruptError)
         {
-            quadcopterState = "Takeoff";
-            //increase altitude
-        }*/
-        
-        //gpsCurr = getGPS();
-        //atDestination = Navigate(gpsFinalDest,sensorArray,gpsCurr); //change flight path using sensor data
-        
-        //Survey
-        /*if (atDestination && !strcmp(quadcopterState,"FlyBack"))
-        {
-            PORTBbits.RB13 = 1; //green LED
-            quadcopterState = "Survey";
-            surveyed = survey();
+            continue;
         }
         
-        //Return Home
-        if (surveyed)
+        //Know if drone is alive
+        heartbeatCount = heartBeat(heartbeatCount);
+        i = 0;
+        //Grab sensor values from interrupt
+        for(i = 0; i <= SENSOR_COUNT_AMOUNT;i++)
         {
-            quadcopterState = "FlyBack";
-            atDestination = Navigate(initialGPS,sensorArray,gpsCurr);
+            sensorArray[i] = getSensorArrayVal(i);
+        }
+        i = 1;
+        gpsCurr = getGPS();
+        
+        // --------------- Final Main Control Flow ---------------
+        if (prevBattLowFlag) //ensures battery low flag is consistent
+        {
+            batteryLowFlag = 1;
+        }
+        else
+        {
+            batteryLowFlag = checkBattery();
         }
         
-        //Land
-        if (atDestination && strcmp(quadcopterState,"FlyBack"))
+        if (!batteryLowFlag)
         {
-            quadcopterState = "Landing";
-            //TODO: add land function
-            //landed = land();
+            prevBattLowFlag = 0;
+            goFlag = checkGo(ARMFLAG); //press once for go, press again to kill throttle
             
+            if (goFlag && !takeoffDoneFlag)
+            {
+                takeoffDoneFlag = takeoff(sensorArray[4]);
+            }
+            
+            if (takeoffDoneFlag && !atDestinationFlag)
+            {
+                atDestinationFlag = Navigate(gpsFinalDest,sensorArray,gpsCurr,ARMFLAG);
+                
+            }
+            
+            if (atDestinationFlag && !surveyDoneFlag)
+            {
+                surveyDoneFlag = survey();
+            }
+            
+            if (surveyDoneFlag && !atHQFlag)
+            {
+                atHQFlag = Navigate(initialGPS,sensorArray,gpsCurr,ARMFLAG);
+            }
+            
+            if (atHQFlag && !landDoneFlag)
+            {
+                landDoneFlag = land();
+            }
+            
+            if (landDoneFlag)
+            {
+                printMsgToLCD("Mission",LINE1);
+                printMsgToLCD("Complete",LINE2);
+            }
         }
-        
-        if (landed)
+        else
         {
-            quadcopterState = "MissionComplete";
-        }*/
-        //LCDWrite(CLEAR,0,0);
-        //printMsgToLCD((char*)sensorArray,LINE1);
-        
-        /*
-        // Check for receive errors
-        if(U1STAbits.FERR == 1)
-        {
-            continue;
+            prevBattLowFlag = 1;
+            landDoneFlag = land();
+            
+            if (landDoneFlag)
+            {
+                printMsgToLCD("Low",LINE1);
+                printMsgToLCD("Battery",LINE2);
+            }
+           
         }
-        // Must clear the overrun error to keep UART receiving 
-        if(U1STAbits.OERR == 1)
-        {
-            U1STAbits.OERR = 0;
-            continue;
-        }
-        */
+
     }
     
 }

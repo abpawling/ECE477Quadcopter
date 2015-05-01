@@ -4,7 +4,6 @@
  *
  * Created on April 18, 2015, 1:15 PM
  */
-#include <stdbool.h>
 
 //---------- Macros ----------
 
@@ -26,17 +25,19 @@
 #define FCY             SYS_FREQ/2
 
 //OTHER
-#define DETECTION_CUTOFF 25
+#define DETECTION_CUTOFF 15
 #define COLLISION_COUNT 20
 #define SENSOR_COUNT_AMOUNT 6
 #define GPS_LENGTH 100
 #define CAM_DATA_AMOUNT 100
+#define CRUISING_INCREMENTER 10
+#define SENSOR_ALT_CUTOFF 15
 
 //---------- Functions ----------
 
 //LCD
 void printMsgToLCD(char *,char); //Usage: arg1= message, arg2= line#
-void LCDWrite(char,bool,bool); //Usage: arg1 = character, arg2 = rs, arg3 = rw
+void LCDWrite(char,int,int); //Usage: arg1 = character, arg2 = rs, arg3 = rw
 void wait(void);
 
 //PARSE GPS DATA

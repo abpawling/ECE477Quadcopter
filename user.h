@@ -1,27 +1,32 @@
 #include "utils.h"
 
-//STARTUP
+
 int heartBeat(int); /*Blinks heartbeat LED*/
-void Arm(void); /*Arm Flight Controller*/
-void checkGo(void);
+void Arm(int); /*Arm Flight Controller*/
+int checkGo(int); /*Arms flight controller and kills throttle */
+int checkInterruptErrors(void);
+int takeoff(int); /*Sets quadcopter to desired altitude*/
+int land(void); /*Lands quadcopter*/
+int checkBattery(void); /*Monitors battery and returns various levels*/
 
 //NAV
-bool Navigate(gpsUpdate gpsFinalDest, int* sensorArray,gpsUpdate); /*Top-Level GPS Waypoint navigation function*/
+int Navigate(gpsUpdate gpsFinalDest, int sensorArray[],gpsUpdate,int); /*Top-Level GPS Waypoint navigation function*/
 void orientQuad(gpsUpdate,gpsUpdate); /*Orients quadcopter to face the survey location*/
-bool flyToFinalDest(gpsUpdate,gpsUpdate,int*); /*Navigates to surey location*/
+int flyToFinalDest(gpsUpdate,gpsUpdate,int[],int); /*Navigates to surey location*/
 gpsUpdate* addToCollisionArray(gpsUpdate); /*Add collisions to array - keeps track of collisions for return flight path*/
 
 //SURVEY
-bool survey(void); /*Takes photos at surevey location*/
+int survey(void); /*Takes photos at surevey location*/
 
 //SD
-bool InitSD(void);
+int InitSD(void);
 gpsUpdate grabGPSFinal(); /*Retrieves GPS data from SD card*/
-bool WriteSD(char*);
-bool ReadSD(void);
+int WriteSD(char*);
+int ReadSD(void);
 
 //GET/SET
-int* getSensorArray(); /*Used to update sensor data*/
+int getSensorArrayVal(int);
 gpsUpdate getGPS(void); /*Used to update GPS data*/
 void setGPS(gpsUpdate); /*Used to update GPS data*/
+//void setSensorArray(int * sa);
 

@@ -1,7 +1,6 @@
 #include "utils.h"
 #include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
-#include <stdbool.h>
 #include <string.h>
 /* ----- USAGE ----- 
     *      R/W = D4
@@ -14,7 +13,7 @@
 /* to write data: rs = 1, rw = 0
  * to write instruction: rs = 0, rw = 0
  */
-void LCDWrite(char out, bool rs, bool rw) 
+void LCDWrite(char out, int rs, int rw) 
 {   
     LATCbits.LATC14 = rs; //RS high
     LATDbits.LATD4 = rw; //R/W low
@@ -41,7 +40,9 @@ void LCDWrite(char out, bool rs, bool rw)
 void printMsgToLCD(char * msg, char line)
 {
    int i = 0;
-   LCDWrite(line,0,0);
+   //LCDWrite(CLEAR,0,0);
+   //LCDWrite(line,0,0);
+   
    while (msg[i] != '\0')
    {
      LCDWrite(msg[i],1,0);

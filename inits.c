@@ -121,7 +121,7 @@ void InitAnalogFunctionality(void)
     ANSELGbits.ANSG9 = 0; //clear analog functionality of RG9 //pin 8
     
     //LEDS
-    ANSELBbits.ANSB12 = 0; //clear analog functionality of RB12 //pin 27
+    ANSELBbits.ANSB12 = 0; //clear analog functionality of RB12 //pin 27 //heartbeat
     ANSELBbits.ANSB13 = 0; //clear analog functionality of RB13 //pin 28
     ANSELBbits.ANSB14 = 0; //clear analog functionality of RB14 //pin 29
     //TODO: pin 32 is already digital?
@@ -279,7 +279,7 @@ void InitTimers(void)
     T5CONbits.TGATE = 0; // Disable Gated Timer mode
     T5CONbits.TCKPS = 0b01;//0b01; //0b00 - Select 1:1 Prescalar
     TMR5 = 0x00; // Clear timer register
-    PR5 = 1000;//10000; // Load the period value
+    PR5 = 10000; //1000 // Load the period value
     IEC1bits.T5IE = 1; // Enable Timer5 interrupt
     
     // Enable Timers
