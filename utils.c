@@ -61,11 +61,11 @@ double parse(char* val, char* tag)
     
     if (strcmp(tag,"lat") || strcmp(tag,"long")) //latitude or longitude
     {
-        return (val[0] * 100000) + (val[1] * 10000) + (val[2] * 1000) + (val[3] * 100) + (val[4] * 10) + (val[5]) + (val[6]/10) + (val[7]/100) + (val[8]/1000) + (val[9]/10000);
+        return ((val[0] - 48) * 100000) + ((val[1] - 48) * 10000) + ((val[2] - 48) * 1000) + ((val[3] - 48) * 100) + ((val[4] - 48) * 10) + ((val[5] - 48)) + ((val[6] - 48)/10) + ((val[7] - 48)/100) + ((val[8] - 48)/1000) + ((val[9] - 48)/10000);
     }
     else if (strcmp(tag,"alt")) //altitude
     {
-        return (val[0] * 100) + (val[1] * 10) + (val[2]) + (val[3]/10) + (val[4]/100);
+        return ((val[0] - 48) * 100) + ((val[1] - 48) * 10) + ((val[2] - 48)) + ((val[3] - 48)/10) + ((val[4] - 48)/100);
     }
     else
     {

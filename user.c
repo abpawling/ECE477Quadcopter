@@ -29,12 +29,13 @@ int collisionIndex = 0;
  * Arms Flight Controller
  * 
  ******************************************************************************/
-void Arm(int ARMFLAG)
+int Arm(int ARMFLAG)
 {
     ARMFLAG = 1;
-    printMsgToLCD("ARMING",LINE1);
+    //printMsgToLCD("ARMING",LINE1);
     OC3R = 4400; //THROTTLE //pin55
     OC4R = 7600; //YAW //pin58
+    return ARMFLAG;
 }
 
 /******************************************************************************
@@ -62,7 +63,7 @@ int checkGo(int ARMFLAG)
         prevPush = 1;
         armed = 1;
         go = 1;
-        Arm(ARMFLAG);
+        ARMFLAG = Arm(ARMFLAG);
         IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
         IEC1bits.T4IE = 1; // Enable Timer4 interrupt
         T4CONbits.TON = 1; // Start Timer4
@@ -117,14 +118,14 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  * Controls quadcopter
  * 
  ******************************************************************************/
- int Navigate(gpsUpdate GPSFinal, int sensorArray[], gpsUpdate currentGPS,int ARMFLAG)
+ int Navigate(gpsUpdate GPSFinal, int sensorArray[], gpsUpdate currentGPS)
 {
     int atDest = 0;
      
     //face GPSFinal location
     //orientQuad(currentGPS,GPSFinal);
     
-    atDest = flyToFinalDest(currentGPS,GPSFinal,sensorArray,ARMFLAG);
+    atDest = flyToFinalDest(currentGPS,GPSFinal,sensorArray);
     
     return atDest;
  }
@@ -135,7 +136,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  int rightEN = 1;
  int downEN = 1;
  int gCount = 0;
- int flyToFinalDest(gpsUpdate currGPS, gpsUpdate finalGPS, int sensorArray[],int ARMFLAG)
+ int flyToFinalDest(gpsUpdate currGPS, gpsUpdate finalGPS, int sensorArray[])
  {
     gCount++; 
     int frontFlag = 0;
@@ -155,31 +156,56 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
         
         //check for collisions
 
-    if (frontFlag)
+    /*if (frontFlag)
     {
         OC3R = 4400;
-    }
+    }*/
+    
+    //OC1R = 4000; //ROLL (pin59 on micro) (pin6 on breakout) (CH1/RC1 on Flight Controller)
+    //OC2R = 4000; //PITCH (pin54 on micro) (pin3 on breakout) (CH2/RC2 on Flight Controller)
+    //OC3R = 4000; //THROTTLE (pin55 on micro) (pin4 on breakout) (CH3/RC3 on Flight Controller)
+    //OC4R = 4000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
     
     if (gCount >= 5000)
     {
+        //LCDWrite(CLEAR,0,0);
         gCount = 0;
-        LCDWrite(CLEAR,0,0);
-        printMsgToLCD("F:",LINE1); 
-        LCDWrite(frontFlag+48,1,0);
-        printMsgToLCD(" L:",LINE1);
-        LCDWrite(leftFlag+48,1,0);
-        LCDWrite(LINE2,0,0);
-        printMsgToLCD("R:",LINE2); 
-        LCDWrite(rightFlag+48,1,0);
-        printMsgToLCD("D:",LINE2);
-        LCDWrite(downFlag+48,1,0);
-        if (ARMFLAG)
-        {
-            LCDWrite('A',1,0);
-        }
-        
-        
     }   
+    
+    if (frontFlag && !leftFlag)
+    {
+        LCDWrite(RET_HOME,0,0);
+        printMsgToLCD("left   ",LINE1);
+        OC1R = 5500; //ROLL
+        OC2R = 6000; //PITCH
+        OC4R = 6000; //YAW
+    }
+    else if (!frontFlag)
+    {
+        LCDWrite(RET_HOME,0,0);
+        printMsgToLCD("forward",LINE1);
+        OC1R = 6000; //ROLL
+        OC2R = 5500; //PITCH
+        OC4R = 6000; //YAW
+    }
+    else if (leftFlag && !rightFlag)
+    {
+        LCDWrite(RET_HOME,0,0);
+        printMsgToLCD("right  ",LINE1);
+        OC1R = 6500; //ROLL
+        OC2R = 6000; //PITCH
+        OC4R = 6000; //YAW
+    }
+    else if (rightFlag && !leftFlag)
+    {
+        LCDWrite(RET_HOME,0,0);
+        printMsgToLCD("left   ",LINE1);
+        OC1R = 5500; //ROLL
+        OC2R = 6000; //PITCH
+        OC4R = 6000; //YAW
+    }
+    
+    
     
         /*
         //TODO: Finish
@@ -253,46 +279,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  
  void orientQuad(gpsUpdate currentGPS, gpsUpdate GPSFinal)
  {
-     //TODO: add error tolerance
-     if (currentGPS.longitude < GPSFinal.longitude)
-    {
-        //east
-        while (currentGPS.eastWest != 'E')
-        {
-            //spin east
-        }
-        
-    }
-    
-    if (currentGPS.longitude > GPSFinal.longitude)
-    {
-        //east
-        while (currentGPS.eastWest != 'W')
-        {
-            //spin west
-        }
-        
-    }
-    
-    if (currentGPS.latitude < GPSFinal.latitude)
-    {
-        //east
-        while (currentGPS.northSouth != 'N')
-        {
-            //spin north
-        }
-        
-    }
-    
-    if (currentGPS.latitude > GPSFinal.latitude)
-    {
-        //east
-        while (currentGPS.northSouth != 'S')
-        {
-            //spin south
-        }
-        
-    }
+     
  }
  
  gpsUpdate grabGPSFinal()
@@ -301,21 +288,15 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
      
      //final.latitude = ;
      //final.longitude = ;
-     
-     /*final.altitude = ;
-     final.eastWest = ;
-     final.northSouth = ;*/
+     //final.altitude = ;
+     //final.eastWest = ;
+     //final.northSouth = ;
      return final;
  }
  
  int survey(void)
  {
-     int done = 0;
-     
-     //take pictures & store to SD card
-     //done = 1;
-     
-     return done;
+     return 0;
  }
  
  int checkBattery(void)
@@ -328,7 +309,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
      if (beatCount >= 8000)
         {
             PORTBbits.RB12 = 1; //yellow heartbeat LED
-            if (beatCount >= 100000)
+            if (beatCount >= 10000)
             {
                 beatCount = 0;
                 //U1TXREG = 0b01010101; //for testing
@@ -336,7 +317,6 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
         }
         else
         {
-            //LCDWrite(CLEAR,0,0);
             PORTBbits.RB12 = 0; //yellow heartbeat LED
         }
         beatCount++;
@@ -345,18 +325,28 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  
  int takeoff(int downSensorValue)
  {
-    return 1;
-    /*
-    if (downSensorValue < SENSOR_ALT_CUTOFF) //TODO: test for cutoff value
-    {           
-        //increase altitude
-        //OC3R += CRUISING_INCREMENTER; //THROTTLE
+    //printMsgToLCD(downSensorValue,LINE2);
+    //PSSC#1
+    if (downSensorValue < 14) //TODO: test for cutoff value
+    {        
+        if (OC3R >= 7000)
+        {
+            OC3R = 7000;
+            IEC1bits.T4IE = 0; // Disable Timer4 interrupt
+            T4CONbits.TON = 0; // Stop Timer4
+        }
+        
         return 0;
     }
     else
     {
+        OC3R = 5000;
+        IEC1bits.T4IE = 0; // Disable Timer4 interrupt
+        T4CONbits.TON = 0; // Stop Timer4
         return 1; //at desired altitude
-    }*/
+    }
+    //return 1;
+     
  }
  
  int checkInterruptErrors(void)

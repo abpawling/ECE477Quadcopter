@@ -20,8 +20,21 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "utils.h"
 #include "p24EP512GP806.h"
-#include <string.h>
 //#include "p24EP512GU810.h"
+
+//hazardous global vars for interrupts
+int h = 0;
+int k = 0;
+int j = 0;
+int commaCount = 0;
+int latIndex = 0;
+int longIndex = 0;
+int write = 0;
+char ReceiveBuff [GPS_LENGTH];
+char Lat [9];
+char Long [9];
+char Altitude [6];
+char gpsTest [10] = {0,0,0,0,0,0,0,0,0,0};
 
 int armCount = 0; //global var to get proper ARM timing of flight controller
 
@@ -45,9 +58,19 @@ int getSensorArrayVal(int index)
     sensorArray = sa;
 }*/
 
+char getGPSBuff(int index)
+{
+    return ReceiveBuff[index];
+}
+
 gpsUpdate getGPS()
 {
     return gp; 
+}
+
+int getArmCount(void)
+{
+    return armCount;
 }
 
 void setGPS(gpsUpdate g)
@@ -64,108 +87,67 @@ void setGPS(gpsUpdate g)
  * UART1 ISR - U1RX INTERRUPT
  * 
  ******************************************************************************/
-//hazardous global vars for interrupts
-int h = 0;
-int k = 0;
-int j = 0;
-int commaCount = 0;
-int latIndex = 0;
-int longIndex = 0;
-int write = 0;
-char ReceiveBuff [GPS_LENGTH];
-char Lat [9];
-char Long [9];
-char Altitude [6];
-
+char buf = 0;
 void __attribute__((__interrupt__)) _U1RXInterrupt(void)
 {
     
-    if (h == 0)
+    /*if (h == 0)
     {
         h = 1;
         for(j = 0; j <= 100;j++)
         {
             ReceiveBuff[j] = 1;
         }
-    }
+    }*/
     
-    ReceiveBuff[k] = U1RXREG;
-    k++;
+    //ReceiveBuff[k] = U1RXREG;
+    buf = U1RXREG;
     
-    if (ReceiveBuff[k] == ',')
+    /*if (U1RXREG != ',')
+    {
+        gpsTest[k] = ReceiveBuff[k];
+    }*/
+    
+    if (buf == ',')
     {
         commaCount++;
     }
     
-    if (commaCount == 2)
+    else if (commaCount == 2)
     {
-        Lat[latIndex] = ReceiveBuff[k];
+        Lat[latIndex] = buf;
         latIndex++;
     }
     
-    if (commaCount == 3)
+    else if (commaCount == 3)
     {
-        gp.eastWest = ReceiveBuff[k];
+        //LCDWrite(RET_HOME,0,0);
+        //printMsgToLCD(Lat,LINE1);
+        gp.eastWest = buf;
     }
     
-    if (commaCount == 4)
+    else if (commaCount == 4)
     {
-        Long[longIndex] = ReceiveBuff[k];
+        Long[longIndex] = buf;
         longIndex++;
     }
     
-    if (commaCount == 5)
+    else if (commaCount == 5)
     {
-        gp.northSouth = ReceiveBuff[k];
+        gp.northSouth = buf;
     }
-    
-    //getting data formatted    
-    gp.latitude = parse(Lat, "lat");
-    gp.longitude = parse(Long, "long");
-    gp.altitude = parse(Altitude, "alt");
-    
-    setGPS(gp);
-    
+    k++;
+ 
     if(k == 100)
     {
-        
-        
-        /*LCDWrite(CLEAR,0,0);
-         //printMsgToLCD(ReceiveBuff, LINE1);
-        for (write = 0;write <= 7;write++)
-        {
-            LCDWrite(ReceiveBuff[write],1,0);
-        }
-        LCDWrite(LINE2,0,0);
-        for (write = 8;write <= 15;write++)
-        {
-            LCDWrite(ReceiveBuff[write],1,0);
-        }*/
-        
-        
-        // ----------  TESTING  ----------
-        /*
-        double latitude;
-        double longitude;
-        double altitude;
-        char eastWest;
-        char northSouth;
-         */
-        
-        /*
-        printMsgToLCD("LAT: ", LINE1);
-        printMsgToLCD(Lat, LINE1);
-        printMsgToLCD("LONG: ", LINE2);
-        printMsgToLCD(Long, LINE2);
-         */
-        
-        // ----------  END TESTING  ----------
+        //gp.latitude = parse(Lat, "lat");
+        //gp.longitude = parse(Long, "long");
+        //gp.altitude = parse(Altitude, "alt");
+    
+        //setGPS(gp);   
         
         k = 0;                
     }
-    
-    
-    //U1TXREG = 'a'; // Transmit one character
     IFS0bits.U1RXIF = 0; // Clear RX Interrupt flag
     
 }
@@ -286,44 +268,27 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
         //LCDWrite(LINE2,0,0);
         //printMsgToLCD("SPINNING",LINE2); 
         OC4R = 6000; //YAW To neutral 
-        OC3R = 5000; //THROTTLE
+        //OC3R = 4600; //THROTTLE
 
         //IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         //T4CONbits.TON = 0; // Stop Timer4
         
     }
     
-    if (armCount == 10) //kill throttle
+    if (armCount > 4)
+    {
+        OC3R += 200; //THROTTLE        
+    }
+    
+    /*if (armCount == 10) //kill throttle
     {
         OC3R = 4400; //THROTTLE
         //ARMFLAG = 0;
         IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
         
-    }
+    }*/
+    
     armCount++;
     IFS1bits.T4IF = 0; //Clear Timer4 interrupt flag
 }
-
-/******************************************************************************
- * 
- * DMA0 ISR - SPI Transmission
- * 
- ******************************************************************************/
-/*void __attribute__((__interrupt__)) _DMA0Interrupt(void)
-{
-    static unsigned int BufferCount = 0; // Keep record of the buffer that contains TX data
-    if(BufferCount == 0)
-    {
-        //TxData(BufferA); // Transmit SPI data in DMA RAM Primary buffer TODO: ??
-        
-    }
-    else
-    {
-        //TxData(BufferB); // Transmit SPI data in DMA RAM Secondary buffer TODO: ??
-        
-    }
-        BufferCount ^= 1;
-        IFS0bits.DMA0IF = 0; // Clear the DMA0 Interrupt flag
-}
-  */

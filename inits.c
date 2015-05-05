@@ -19,16 +19,7 @@
 #include "utils.h"
 
 void InitApp(void)
-{
-    
-    //Initialize Oscillator?
-  
-    //_PLLDIV = 38;
-    //_PLLPRE = 0;
-    //_PLLPOST = 0;
-    
-    //CLKDIVbits.FRCDIV = 1; // 8MHz
-    
+{   
     
     RPOR6bits.RP87R = 0b110001;
     REFOCON = 0x8300;
@@ -173,7 +164,6 @@ void InitIO(void)
     // 0 = output
     
     //GPS
-    //TRISE = 0b0000000000001010; //set RE1, RE3 as inputs
     TRISEbits.TRISE1 = 1; //set RE1 as input // pin 61 (GPS TX / Micro RX)
     TRISEbits.TRISE2 = 0; //set RE2 as output // pin 62 (GPS RX / Micro TX)
     
@@ -404,7 +394,7 @@ void InitUART(void)
     // ---------- UART2 Initialization (Interfaces with Camera) ----------
 
     RPINR19bits.U2RXR = 0b0101111; //Maps U2RX to RPI47 (pin 30)
-    RPOR9bits.RP100R = 0b1100100; // Maps U2TX to RP100  (pin 31)
+    //RPOR9bits.RP100R = 0b1100100; // Maps U2TX to RP100  (pin 31)
     
     U2MODEbits.STSEL = 0; // 1-Stop bit
     U2MODEbits.PDSEL = 0; // No Parity, 8-Data bits

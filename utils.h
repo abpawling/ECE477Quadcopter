@@ -25,13 +25,11 @@
 #define FCY             SYS_FREQ/2
 
 //OTHER
-#define DETECTION_CUTOFF 15
+#define DETECTION_CUTOFF 20
 #define COLLISION_COUNT 20
 #define SENSOR_COUNT_AMOUNT 6
 #define GPS_LENGTH 100
 #define CAM_DATA_AMOUNT 100
-#define CRUISING_INCREMENTER 10
-#define SENSOR_ALT_CUTOFF 15
 
 //---------- Functions ----------
 

@@ -18,13 +18,11 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 
-//#include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
 #include "inits.h"
 #include "utils.h"
 #include "string.h"
 #include "p24EP512GP806.h"
-//#include "p24EP512GU810.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -39,11 +37,10 @@
 
 int16_t main(void)
 {
-    /* Declarations */
     
     // Positions            F,B,L,R,D,count
     //int * sensorArray;// = {0,0,0,0,0,0};
-    int sensorArray [SENSOR_COUNT_AMOUNT]= {30,30,30,30,30,0};
+    int sensorArray2 [SENSOR_COUNT_AMOUNT]= {30,30,30,30,30,0};
     int batteryLowFlag = 0;
     int goFlag = 0;
     int atDestinationFlag = 0;
@@ -59,7 +56,8 @@ int16_t main(void)
     gpsUpdate initialGPS;
     initialGPS = gpsCurr;
     int i = 0;
-    int ARMFLAG = 0;
+    int ac = 0;
+    //char gpsBuff [GPS_LENGTH];
     
     /* Configure the oscillator for the device */
     ConfigureOscillator();
@@ -88,11 +86,14 @@ int16_t main(void)
         heartbeatCount = heartBeat(heartbeatCount);
         i = 0;
         //Grab sensor values from interrupt
-        for(i = 0; i <= SENSOR_COUNT_AMOUNT;i++)
+        for(i = 0; i <= 5;i++)
         {
-            sensorArray[i] = getSensorArrayVal(i);
+            sensorArray2[i] = getSensorArrayVal(i);
         }
-        i = 1;
+        /*for(i = 0; i <= GPS_LENGTH;i++)
+        {
+            gpsBuff[i] = getGPSBuff(i);
+        }*/
         gpsCurr = getGPS();
         
         // --------------- Final Main Control Flow ---------------
@@ -108,17 +109,21 @@ int16_t main(void)
         if (!batteryLowFlag)
         {
             prevBattLowFlag = 0;
-            goFlag = checkGo(ARMFLAG); //press once for go, press again to kill throttle
             
+            goFlag = checkGo(); //press once for go, press again to kill throttle
+            ac = getArmCount();
+            //LCDWrite(RET_HOME,0,0);
+            //printMsgToLCD(gpsBuff, LINE1);
             if (goFlag && !takeoffDoneFlag)
             {
-                takeoffDoneFlag = takeoff(sensorArray[4]);
+                LCDWrite(RET_HOME,0,0);
+                printMsgToLCD("Takeoff",LINE2);
+                takeoffDoneFlag = takeoff(sensorArray2[4]);
             }
             
             if (takeoffDoneFlag && !atDestinationFlag)
             {
-                atDestinationFlag = Navigate(gpsFinalDest,sensorArray,gpsCurr,ARMFLAG);
-                
+                atDestinationFlag = Navigate(gpsFinalDest,sensorArray2,gpsCurr);
             }
             
             if (atDestinationFlag && !surveyDoneFlag)
@@ -128,7 +133,7 @@ int16_t main(void)
             
             if (surveyDoneFlag && !atHQFlag)
             {
-                atHQFlag = Navigate(initialGPS,sensorArray,gpsCurr,ARMFLAG);
+                atHQFlag = Navigate(initialGPS,sensorArray2,gpsCurr);
             }
             
             if (atHQFlag && !landDoneFlag)
