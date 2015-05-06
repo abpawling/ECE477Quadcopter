@@ -27,7 +27,6 @@ int ReadSD(void);
 //GET/SET
 int getSensorArrayVal(int);
 gpsUpdate getGPS(void); /*Used to update GPS data*/
-char getGPSBuff(int);
 void setGPS(gpsUpdate); /*Used to update GPS data*/
 int getArmCount(void);
 //void setSensorArray(int * sa);

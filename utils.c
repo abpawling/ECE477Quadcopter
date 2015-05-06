@@ -1,7 +1,6 @@
 #include "utils.h"
 #include "p24EP512GP806.h"
 //#include "p24EP512GU810.h"
-#include <string.h>
 /* ----- USAGE ----- 
     *      R/W = D4
     *      RS = C14
@@ -56,21 +55,33 @@ void wait(void)
     for (i = 0; i <= 4800; i++) {}
 }
 
-double parse(char* val, char* tag)
+long parse(char* val, int tag)
 {
+    // tag == 1 : lat
+    int temp;
     
-    if (strcmp(tag,"lat") || strcmp(tag,"long")) //latitude or longitude
+    if (tag == 1) //latitude1
     {
-        return ((val[0] - 48) * 100000) + ((val[1] - 48) * 10000) + ((val[2] - 48) * 1000) + ((val[3] - 48) * 100) + ((val[4] - 48) * 10) + ((val[5] - 48)) + ((val[6] - 48)/10) + ((val[7] - 48)/100) + ((val[8] - 48)/1000) + ((val[9] - 48)/10000);
+        temp = ((val[0] - 48) * 1000) + ((val[1] - 48) * 100) + ((val[2] - 48) * 10) + ((val[3] - 48) * 1);
+        //temp = ((val[0] - 48) * 10000000) + ((val[1] - 48) * 1000000) + ((val[2] - 48) * 100000) + ((val[3] - 48) * 10000) + ((val[5] - 48) * 1000) + ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
+        return temp;
     }
-    else if (strcmp(tag,"alt")) //altitude
+    else if (tag == 2)
     {
-        return ((val[0] - 48) * 100) + ((val[1] - 48) * 10) + ((val[2] - 48)) + ((val[3] - 48)/10) + ((val[4] - 48)/100);
+        temp = ((val[5] - 48) * 1000) + ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
+        return temp;
     }
-    else
+    else if (tag == 3)
     {
-        return 0;
+        temp = ((val[0] - 48) * 10000) + ((val[1] - 48) * 1000) + ((val[2] - 48) * 100) + ((val[3] - 48) * 10) + ((val[4] - 48) * 1);
+        return temp;
     }
+    else if (tag == 4)
+    {
+        temp = ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
+        return temp;
+    }
+    return temp;
 }
  
 

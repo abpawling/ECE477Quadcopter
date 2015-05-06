@@ -23,6 +23,19 @@
 
 gpsUpdate collisions [COLLISION_COUNT];
 int collisionIndex = 0;
+int frontEN = 1;
+int backEN = 1;
+int leftEN = 1;
+int rightEN = 1;
+int downEN = 1;
+gpsUpdate prevGPS;
+int push = 0;
+int armed = 0;
+int prevPush = 0;
+int disarmCount = 0;
+int go = 0;
+int gCount = 0;
+int gCount2 = 0;
 
 /******************************************************************************
  * 
@@ -43,11 +56,7 @@ int Arm(int ARMFLAG)
  * Checks pushbutton: press once for go, press again to kill throttle
  * 
  ******************************************************************************/
-int push = 0;
-int armed = 0;
-int prevPush = 0;
-int disarmCount = 0;
-int go = 0;
+
 
 int checkGo(int ARMFLAG)
 //void checkGo(void)
@@ -130,12 +139,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
     return atDest;
  }
  
- int frontEN = 1;
- int backEN = 1;
- int leftEN = 1;
- int rightEN = 1;
- int downEN = 1;
- int gCount = 0;
+
  int flyToFinalDest(gpsUpdate currGPS, gpsUpdate finalGPS, int sensorArray[])
  {
     gCount++; 
@@ -144,6 +148,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
     int leftFlag = 0;
     int rightFlag = 0;
     int downFlag = 0;
+    
     
     //if (currGPS.latitude != finalGPS.latitude && currGPS.longitude != finalGPS.longitude) //TODO: add error tolerance
     //{
@@ -154,25 +159,47 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
         if (sensorArray[3] <= DETECTION_CUTOFF) {rightFlag = 1;} //RIGHT Sensor value
         if (sensorArray[4] <= DETECTION_CUTOFF) {downFlag = 1;} //DOWN Sensor value
         
-        //check for collisions
-
-    /*if (frontFlag)
+    //OC1R = 6000; //ROLL (pin59 on micro) (pin6 on breakout) (CH1/RC1 on Flight Controller)
+    //OC2R = 6000; //PITCH (pin54 on micro) (pin3 on breakout) (CH2/RC2 on Flight Controller)
+    //OC3R = 4400; //THROTTLE (pin55 on micro) (pin4 on breakout) (CH3/RC3 on Flight Controller)
+    //OC4R = 6000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
+    
+    
+    /*if (gCount >= 1000)
     {
-        OC3R = 4400;
-    }*/
-    
-    //OC1R = 4000; //ROLL (pin59 on micro) (pin6 on breakout) (CH1/RC1 on Flight Controller)
-    //OC2R = 4000; //PITCH (pin54 on micro) (pin3 on breakout) (CH2/RC2 on Flight Controller)
-    //OC3R = 4000; //THROTTLE (pin55 on micro) (pin4 on breakout) (CH3/RC3 on Flight Controller)
-    //OC4R = 4000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
-    
-    if (gCount >= 5000)
+        gCount2++;
+        if ( (finalGPS.latitude2 - currGPS.latitude2) > (finalGPS.latitude2 - prevGPS.latitude2) && gCount2 <= 1000)
+        {
+            LCDWrite(RET_HOME,0,0);
+            printMsgToLCD("rotleft1",LINE1);
+            OC4R = 6500; //YAW
+        }
+        else if ( (finalGPS.longitude2 - currGPS.longitude2) > (finalGPS.longitude2 - prevGPS.longitude2) && gCount2 <= 1000)
+        {
+            LCDWrite(RET_HOME,0,0);
+            printMsgToLCD("rotleft2",LINE1);
+            OC4R = 6500; //YAW
+        }
+        
+        if (gCount2 == 1000)
+        {
+            gCount = 0;
+            gCount2 = 0;
+        }
+        
+        //gCount = 0;
+        prevGPS = currGPS;
+         
+    }
+    else
     {
-        //LCDWrite(CLEAR,0,0);
-        gCount = 0;
-    }   
+        OC4R = 6000; //YAW
+        LCDWrite(RET_HOME,0,0);
+        printMsgToLCD("straight",LINE1);    
+    }*/   
     
-    if (frontFlag && !leftFlag)
+    //PSSC#2
+    /*if (frontFlag && !leftFlag)
     {
         LCDWrite(RET_HOME,0,0);
         printMsgToLCD("left   ",LINE1);
@@ -203,70 +230,69 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
         OC1R = 5500; //ROLL
         OC2R = 6000; //PITCH
         OC4R = 6000; //YAW
+    }*/
+    
+    //if facing final gps waypoint
+    //OC2R = 5500; //PITCH
+    if ( 
+            ((currGPS.latitude1 - finalGPS.latitude1) == 0) 
+            &&
+            ((currGPS.longitude1 - finalGPS.longitude1) == 0)
+            &&
+            ( (currGPS.latitude2 - finalGPS.latitude2 <= 50) && (currGPS.latitude2 - finalGPS.latitude2 >= -50) )
+            &&
+            ( (currGPS.longitude2 - finalGPS.longitude2 <= 5) && (currGPS.longitude2 - finalGPS.longitude2 >= -5) ) 
+        )
+    {
+        //LCDWrite(RET_HOME,0,0);
+        //printMsgToLCD("At Dest ",LINE1);
+        return 1;
     }
     
+    if (finalGPS.latitude2 > currGPS.latitude2)
+    {
+        //north
+        LCDWrite(RET_HOME,0,0);
+        LCDWrite(LINE2,0,0);
+        printMsgToLCD("North   ",LINE2);
+        OC1R = 6000; //ROLL
+        OC2R = 5500; //PITCH
+        OC4R = 6000; //YAW
+        
+    }
+    else
+    {
+        LCDWrite(RET_HOME,0,0);
+        LCDWrite(LINE2,0,0);
+        printMsgToLCD("South   ",LINE1);
+        OC1R = 6000; //ROLL
+        OC2R = 6500; //PITCH
+        OC4R = 6000; //YAW
+        
+    }
     
+    if (finalGPS.longitude2 > currGPS.longitude2)
+    {
+        //east
+        LCDWrite(RET_HOME,0,0);
+        LCDWrite(LINE1,0,0);
+        //printMsgToLCD("Go East",LINE1);
+        printMsgToLCD("West    ",LINE1);
+        OC1R = 5500; //ROLL
+        OC2R = 6000; //PITCH
+        OC4R = 6000; //YAW
+    }
+    else
+    {
+            LCDWrite(RET_HOME,0,0);
+            LCDWrite(LINE1,0,0);
+            printMsgToLCD("East    ",LINE1);
+            OC1R = 6500; //ROLL
+            OC2R = 6000; //PITCH
+            OC4R = 6000; //YAW
+        
+    }
     
-        /*
-        //TODO: Finish
-        if (frontFlag) // && currGPS.latitude < finalGPS.latitude) // && 
-        {
-            //printMsgToLCD("FRONT", LINE1);
-            if (currGPS.longitude < finalGPS.longitude)
-            {
-                //go east
-            }
-            else
-            {
-                //go west
-            }
-        }
-        
-        //?
-        if (backFlag) // && currGPS.latitude < finalGPS.latitude) // && 
-        {
-            //printMsgToLCD("BACK", LINE1);
-            if (currGPS.longitude < finalGPS.longitude)
-            {
-                //go east
-            }
-            else
-            {
-                //go west
-            }
-        }
-        
-        if (leftFlag)
-        {
-            //printMsgToLCD("LEFT", LINE1);
-            if (currGPS.latitude < finalGPS.latitude)
-            {
-                //go north
-            }
-            else
-            {
-                //go south
-            }
-        }
-        
-        if (rightFlag)
-        {
-            //printMsgToLCD("RIGHT", LINE1);
-            if (currGPS.latitude < finalGPS.latitude)
-            {
-                //go north
-            }
-            else
-            {
-                //go south
-            }
-        }
-        
-        if (downFlag)
-        {
-            //printMsgToLCD("DOWN", LINE2);
-        }
-         */
         return 0;
     //}
     //else 
@@ -286,9 +312,10 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
  {
      gpsUpdate final;
      
-     //final.latitude = ;
-     //final.longitude = ;
-     //final.altitude = ;
+     final.latitude1 = 4025;
+     final.latitude2 = 7450;
+     final.longitude1 = 8654;
+     final.longitude2 = 781;
      //final.eastWest = ;
      //final.northSouth = ;
      return final;

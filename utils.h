@@ -39,7 +39,7 @@ void LCDWrite(char,int,int); //Usage: arg1 = character, arg2 = rs, arg3 = rw
 void wait(void);
 
 //PARSE GPS DATA
-double parse(char*,char*);
+long parse(char*,int);
 
 //OSC
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
@@ -54,9 +54,11 @@ extern "C" {
     //GPS STRUCTURE: created from parsed GPS data
     struct GPS
     {
-        double latitude;
-        double longitude;
-        double altitude;
+        int latitude1;
+        int latitude2;
+        int longitude1;
+        int longitude2;
+        long altitude;
         char eastWest;
         char northSouth;
     };

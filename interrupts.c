@@ -26,6 +26,7 @@
 int h = 0;
 int k = 0;
 int j = 0;
+int lw = 0;
 int commaCount = 0;
 int latIndex = 0;
 int longIndex = 0;
@@ -108,6 +109,13 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
         gpsTest[k] = ReceiveBuff[k];
     }*/
     
+    if (buf == '$')
+    {
+        commaCount = 0;
+        latIndex = 0;
+        longIndex = 0;
+    }
+    
     if (buf == ',')
     {
         commaCount++;
@@ -138,13 +146,27 @@ void __attribute__((__interrupt__)) _U1RXInterrupt(void)
     }
     k++;
  
-    if(k == 100)
+    if(k == 500)
     {
-        //gp.latitude = parse(Lat, "lat");
-        //gp.longitude = parse(Long, "long");
-        //gp.altitude = parse(Altitude, "alt");
-    
-        //setGPS(gp);   
+        gp.latitude1 = parse(Lat, 1);
+        gp.latitude2 = parse(Lat, 2);
+        gp.longitude1 = parse(Long, 3);
+        gp.longitude2 = parse(Long, 4);
+        
+        /*
+        LCDWrite(LINE1,0,0);
+        LCDWrite(RET_HOME,0,0);
+        for (lw = 1;lw <= 8;lw++)
+        {
+            LCDWrite(Lat[lw],1,0);
+        }
+        LCDWrite(RET_HOME,0,0);
+        LCDWrite(LINE2,0,0);
+        for (lw = 1;lw <= 8;lw++)
+        {
+            LCDWrite(Long[lw],1,0);
+        }
+         */
         
         k = 0;                
     }

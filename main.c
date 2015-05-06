@@ -72,7 +72,7 @@ int16_t main(void)
     //OC4R = 4000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
     
     //get GPS location from SD Card
-    //gpsFinalDest = grabGPSFinal();
+    gpsFinalDest = grabGPSFinal();
     
     while(1)
     {           
@@ -112,12 +112,11 @@ int16_t main(void)
             
             goFlag = checkGo(); //press once for go, press again to kill throttle
             ac = getArmCount();
-            //LCDWrite(RET_HOME,0,0);
-            //printMsgToLCD(gpsBuff, LINE1);
+            
             if (goFlag && !takeoffDoneFlag)
             {
                 LCDWrite(RET_HOME,0,0);
-                printMsgToLCD("Takeoff",LINE2);
+                printMsgToLCD("Takeoff ",LINE1);
                 takeoffDoneFlag = takeoff(sensorArray2[4]);
             }
             
@@ -128,6 +127,12 @@ int16_t main(void)
             
             if (atDestinationFlag && !surveyDoneFlag)
             {
+                LCDWrite(RET_HOME,0,0);
+                printMsgToLCD("Survey  ",LINE1);
+                LCDWrite(RET_HOME,0,0);
+                LCDWrite(LINE2,0,0);
+                printMsgToLCD("PSSC4   ",LINE1);
+                
                 surveyDoneFlag = survey();
             }
             
