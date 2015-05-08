@@ -113,6 +113,12 @@ int16_t main(void)
             goFlag = checkGo(); //press once for go, press again to kill throttle
             ac = getArmCount();
             
+            if (sensorArray2[0] < 15 || sensorArray2[2] < 15 || sensorArray2[3] < 15)
+            {
+                LCDWrite(RET_HOME,0,0);
+                printMsgToLCD("Sensor  ",LINE1);
+                OC3R = 4400;
+            }
             if (goFlag && !takeoffDoneFlag)
             {
                 LCDWrite(RET_HOME,0,0);
@@ -122,7 +128,7 @@ int16_t main(void)
             
             if (takeoffDoneFlag && !atDestinationFlag)
             {
-                atDestinationFlag = Navigate(gpsFinalDest,sensorArray2,gpsCurr);
+                //atDestinationFlag = Navigate(gpsFinalDest,sensorArray2,gpsCurr);
             }
             
             if (atDestinationFlag && !surveyDoneFlag)

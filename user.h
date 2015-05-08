@@ -2,8 +2,8 @@
 
 
 int heartBeat(int); /*Blinks heartbeat LED*/
-int Arm(); /*Arm Flight Controller*/
-int checkGo(); /*Arms flight controller and kills throttle */
+void Arm(void); /*Arm Flight Controller*/
+int checkGo(void); /*Arms flight controller and kills throttle */
 int checkInterruptErrors(void);
 int takeoff(int); /*Sets quadcopter to desired altitude*/
 int land(void); /*Lands quadcopter*/

@@ -287,8 +287,6 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
     
     if (armCount == 4)
     {
-        //LCDWrite(LINE2,0,0);
-        //printMsgToLCD("SPINNING",LINE2); 
         OC4R = 6000; //YAW To neutral 
         //OC3R = 4600; //THROTTLE
 
@@ -297,19 +295,18 @@ void __attribute__((__interrupt__, no_auto_psv)) _T4Interrupt(void)
         
     }
     
-    if (armCount > 4)
+    if (armCount > 4 && armCount < 23)
     {
-        OC3R += 200; //THROTTLE        
+        OC3R += 500; //THROTTLE        
     }
     
-    /*if (armCount == 10) //kill throttle
+    if (armCount >= 22) //kill throttle
     {
         OC3R = 4400; //THROTTLE
-        //ARMFLAG = 0;
         IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
         
-    }*/
+    }
     
     armCount++;
     IFS1bits.T4IF = 0; //Clear Timer4 interrupt flag

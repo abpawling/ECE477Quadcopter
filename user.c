@@ -42,13 +42,12 @@ int gCount2 = 0;
  * Arms Flight Controller
  * 
  ******************************************************************************/
-int Arm(int ARMFLAG)
+void Arm(void)
 {
-    ARMFLAG = 1;
     //printMsgToLCD("ARMING",LINE1);
     OC3R = 4400; //THROTTLE //pin55
     OC4R = 7600; //YAW //pin58
-    return ARMFLAG;
+
 }
 
 /******************************************************************************
@@ -58,13 +57,11 @@ int Arm(int ARMFLAG)
  ******************************************************************************/
 
 
-int checkGo(int ARMFLAG)
+int checkGo(void)
 //void checkGo(void)
 {
     push = PORTGbits.RG9;
     prevPush = push;
-    //LATBbits.LATB13 = !push; //green LED
-    //LATBbits.LATB14 = !push; //green LED
 
     // push = 0: open, push = 1: closed
     if (push && !armed) //arm flight controller
@@ -72,7 +69,7 @@ int checkGo(int ARMFLAG)
         prevPush = 1;
         armed = 1;
         go = 1;
-        ARMFLAG = Arm(ARMFLAG);
+        Arm();
         IFS0bits.T3IF = 0; //Clear Timer4 interrupt flag
         IEC1bits.T4IE = 1; // Enable Timer4 interrupt
         T4CONbits.TON = 1; // Start Timer4
@@ -98,7 +95,6 @@ int checkGo(int ARMFLAG)
     {
         OC3R = 4400; //THROTTLE
         go = 0;
-        ARMFLAG = 0;
     }
     return go;
     
@@ -163,40 +159,6 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
     //OC2R = 6000; //PITCH (pin54 on micro) (pin3 on breakout) (CH2/RC2 on Flight Controller)
     //OC3R = 4400; //THROTTLE (pin55 on micro) (pin4 on breakout) (CH3/RC3 on Flight Controller)
     //OC4R = 6000; //YAW (pin58 on micro) (pin5 on breakout) (CH4/RC4 on Flight Controller)
-    
-    
-    /*if (gCount >= 1000)
-    {
-        gCount2++;
-        if ( (finalGPS.latitude2 - currGPS.latitude2) > (finalGPS.latitude2 - prevGPS.latitude2) && gCount2 <= 1000)
-        {
-            LCDWrite(RET_HOME,0,0);
-            printMsgToLCD("rotleft1",LINE1);
-            OC4R = 6500; //YAW
-        }
-        else if ( (finalGPS.longitude2 - currGPS.longitude2) > (finalGPS.longitude2 - prevGPS.longitude2) && gCount2 <= 1000)
-        {
-            LCDWrite(RET_HOME,0,0);
-            printMsgToLCD("rotleft2",LINE1);
-            OC4R = 6500; //YAW
-        }
-        
-        if (gCount2 == 1000)
-        {
-            gCount = 0;
-            gCount2 = 0;
-        }
-        
-        //gCount = 0;
-        prevGPS = currGPS;
-         
-    }
-    else
-    {
-        OC4R = 6000; //YAW
-        LCDWrite(RET_HOME,0,0);
-        printMsgToLCD("straight",LINE1);    
-    }*/   
     
     //PSSC#2
     /*if (frontFlag && !leftFlag)
@@ -356,9 +318,9 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
     //PSSC#1
     if (downSensorValue < 14) //TODO: test for cutoff value
     {        
-        if (OC3R >= 7000)
+        if (OC3R >= 7600)
         {
-            OC3R = 7000;
+            OC3R = HOVER;
             IEC1bits.T4IE = 0; // Disable Timer4 interrupt
             T4CONbits.TON = 0; // Stop Timer4
         }
@@ -367,7 +329,7 @@ gpsUpdate* addToCollisionArray(gpsUpdate currGPS)
     }
     else
     {
-        OC3R = 5000;
+        OC3R = HOVER;
         IEC1bits.T4IE = 0; // Disable Timer4 interrupt
         T4CONbits.TON = 0; // Stop Timer4
         return 1; //at desired altitude

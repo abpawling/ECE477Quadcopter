@@ -58,28 +58,24 @@ void wait(void)
 long parse(char* val, int tag)
 {
     // tag == 1 : lat
-    int temp;
+    int temp = 0;
     
     if (tag == 1) //latitude1
     {
         temp = ((val[0] - 48) * 1000) + ((val[1] - 48) * 100) + ((val[2] - 48) * 10) + ((val[3] - 48) * 1);
         //temp = ((val[0] - 48) * 10000000) + ((val[1] - 48) * 1000000) + ((val[2] - 48) * 100000) + ((val[3] - 48) * 10000) + ((val[5] - 48) * 1000) + ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
-        return temp;
     }
     else if (tag == 2)
     {
         temp = ((val[5] - 48) * 1000) + ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
-        return temp;
     }
     else if (tag == 3)
     {
         temp = ((val[0] - 48) * 10000) + ((val[1] - 48) * 1000) + ((val[2] - 48) * 100) + ((val[3] - 48) * 10) + ((val[4] - 48) * 1);
-        return temp;
     }
     else if (tag == 4)
     {
         temp = ((val[6] - 48) * 100) + ((val[7] - 48) * 10) + ((val[8] - 48) * 1);
-        return temp;
     }
     return temp;
 }

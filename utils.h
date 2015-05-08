@@ -19,6 +19,7 @@
 #define LINE1 0b10000000
 #define LINE2 0b11000000
 #define CLEAR 0x001
+#define HOVER 6800
 
 //SYSTEM
 #define SYS_FREQ        8000000L
